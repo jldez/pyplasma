@@ -1,0 +1,4 @@
+*.pdf
+*.egg-info
+/dev
+*.pyc
