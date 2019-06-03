@@ -47,7 +47,7 @@ if __name__ == '__main__':
 	materials["sio2_no_ibh"] = {"model":"sre","index":1.45,"bandgap":9.0*c.e,"m_CB":1.0,"m_VB":1.0\
 						 ,"density":2.2e28,"cross_section":0.661e-19,"damping":2.0e15, "gr":1/250e-15}
 
-	taus = np.logspace(np.log10(3),np.log10(4500),15)*1e-15
+	taus = np.logspace(np.log10(3),np.log10(4500),20)*1e-15
 
 	for m in materials:
 		fth_tau = []
@@ -80,6 +80,13 @@ if __name__ == '__main__':
 
 	plt.figlegend([l1,l2],[r"$\mathrm{FI+II}$",r"$\mathrm{FI~only}$"],
 				loc=(0.7,0.21),frameon=False, fontsize=13)
+
+	taus_fit = np.logspace(0,4,100)
+	fit1, = plt.plot(taus_fit, 0.75*taus_fit**0.3, c="0.5")
+	fit2, = plt.plot(taus_fit, 0.63*taus_fit**0.73, c="orange")
+
+	plt.figlegend([fit1,fit2],[r"$F_\mathrm{th}\propto \tau^{0.30}$",r"$F_\mathrm{th}\propto \tau^{0.73}$"],
+				loc=(0.7,0.75),frameon=False, fontsize=13)
 
 	#lebugle2014-2 table1 - 800nm - N=1
 	t = [7,30,100,300]  #2ln(2)
@@ -121,7 +128,7 @@ if __name__ == '__main__':
 	ax.set_xscale('log')
 	plt.xlim(1,10000)
 	plt.ylim(1.0,30)
-	plt.legend(loc=(1e-3,0.4),frameon=False,ncol=1,fontsize=13)
+	plt.legend(loc=(1e-3,0.4),frameon=False,ncol=1,fontsize=13,handletextpad=0)
 	plt.xlabel(r"$\tau~\mathrm{[fs]}$")
 	plt.ylabel(r"$F_{\mathrm{th}}~\mathrm{[J/cm}^2]$",labelpad=0)
 	plt.tight_layout()
