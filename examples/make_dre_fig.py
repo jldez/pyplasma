@@ -58,7 +58,7 @@ def calc(N,tau,fluence):
 
 
 
-def plot_dre(t,data,column, density):
+def plot_dre(t,data,column,density,Ekinmax):
 
 	ax = f.add_subplot(3,2,column)
 	t *= 1e15
@@ -85,10 +85,9 @@ def plot_dre(t,data,column, density):
 	# Temperature of the electrons
 	ax2 = f.add_subplot(3,2,column+2)
 	EF = c.hbar**2.*(3.*c.pi**2.*data["rho"])**(2./3)/(2.*c.m_e)
-	Ekinmax = [1.7822312789626924e-18,7.290911250988981e-19][column-1]*np.ones((len(t)))/c.e
 	plt.semilogy(t,data["Ekin"]/c.e,color=colors[2],label=r"$\mathcal{E}^e_\mathrm{k}$",lw=lw)
 	plt.semilogy(t,EF/c.e,label=r"$\mathcal{E}_F$",color="darkred",ls="-",lw=lw)
-	plt.semilogy(t,Ekinmax,color="k",ls="--",label="limit",lw=lw)
+	plt.semilogy(t,Ekinmax*np.ones((len(t)))/c.e,color="k",ls="--",label="limit",lw=lw)
 	plt.ylim(0.01,30)
 	plt.setp(ax2.get_xticklabels(),visible=False)
 	if column==1 :
@@ -136,25 +135,28 @@ if __name__ == '__main__':
 	sio2_abc = mat.Material(index=1.5, bandgap=9.*c.e, rate_equation="dre", density=2e28, cross_section=1e-19, damping=1e15)
 	laser_abc = las.Laser(wavelength=800e-9, pulse_duration=tau, fluence=fluence, t0=time_abc.min(), transmit=True, phase=False)
 	data_abc = run.run(time_abc, sio2_abc, laser_abc, progress_bar=False, \
-		output=["rho","rho_fi","rho_ii","xi","Ekin","ibh","collision_freq_en","collision_freq_ee"])
+		output=["rho","rho_fi","rho_ii","xi","Ekin","ibh","collision_freq_en","collision_freq_ee","electric_field"])
 	data_abc["ibh"] /= 2 # because we want the ibh rate for electrons only (without holes)
-
+	Ekinmax_abc = mis.Ekin_max(sio2_abc,laser_abc,E=data_abc["electric_field"],s="e")
+	# print(Ekinmax_abc/c.e, data_abc["Ekin"].max()/c.e)
 
 	tau, fluence, N = 300e-15, 4.8e4, 10000
 	time_def = np.linspace(-2*tau, 2*tau, N)
 	sio2_def = mat.Material(index=1.5, bandgap=9.*c.e, rate_equation="dre", density=2e28, cross_section=1e-19, damping=1e15)
 	laser_def = las.Laser(wavelength=800e-9, pulse_duration=tau, fluence=fluence, t0=time_def.min(), transmit=True, phase=False)
 	data_def = run.run(time_def, sio2_def, laser_def, progress_bar=False, \
-		output=["rho","rho_fi","rho_ii","xi","Ekin","ibh","collision_freq_en","collision_freq_ee"])
+		output=["rho","rho_fi","rho_ii","xi","Ekin","ibh","collision_freq_en","collision_freq_ee","electric_field"])
 	data_def["ibh"] /= 2 # because we want the ibh rate for electrons only (without holes)
+	Ekinmax_def = mis.Ekin_max(sio2_def,laser_def,E=data_def["electric_field"],s="e")
+	# print(Ekinmax_def/c.e, data_def["Ekin"].max()/c.e)
 
 
 	f = plt.figure(figsize=(6,8))
 	colors = plt.cm.terrain(np.linspace(0.0, 1.0, 24))
 	lw=2
 
-	plot_dre(time_abc,data_abc,1, density=sio2_abc.density)
-	plot_dre(time_def,data_def,2, density=sio2_def.density)
+	plot_dre(time_abc,data_abc,1, density=sio2_abc.density, Ekinmax=Ekinmax_abc)
+	plot_dre(time_def,data_def,2, density=sio2_def.density, Ekinmax=Ekinmax_def)
 
 	plt.subplots_adjust(hspace = 0.1,wspace = 0.1)
 	plt.savefig("dre.pdf")
