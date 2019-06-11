@@ -15,5 +15,5 @@ setup(name="pyplasma",
       author_email='jean-luc.deziel.1@ulaval.ca',
       packages=['pyplasma'],
 
-      install_requires = ['numpy','matplotlib', 'scipy'],
+      install_requires = ['numpy','matplotlib', 'scipy', 'tqdm'],
     )
