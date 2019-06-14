@@ -14,12 +14,7 @@ import matplotlib.patches as patches
 import scipy.constants as c
 import os
 
-import pyplasma.material as mat
-import pyplasma.laser as las
-import pyplasma.misc as mis
-import pyplasma.drude as dru
-import pyplasma.run as run
-
+import pyplasma as pp
 
 # TO DO : Calculer Ekmax comme il faut. Gerer les output de calc proprement.
 
@@ -132,22 +127,22 @@ if __name__ == '__main__':
 
 	tau, fluence, N = 10e-15, 1.6e4, 2000
 	time_abc = np.linspace(-2*tau, 2*tau, N)
-	sio2_abc = mat.Material(index=1.5, bandgap=9.*c.e, rate_equation="dre", density=2e28, cross_section=1e-19, damping=1e15)
-	laser_abc = las.Laser(wavelength=800e-9, pulse_duration=tau, fluence=fluence, t0=time_abc.min(), transmit=True, phase=False)
-	data_abc = run.run(time_abc, sio2_abc, laser_abc, progress_bar=False, \
+	sio2_abc =pp.Material(index=1.5, bandgap=9.*c.e, rate_equation="dre", density=2e28, cross_section=1e-19, damping=1e15)
+	laser_abc = pp.Laser(wavelength=800e-9, pulse_duration=tau, fluence=fluence, t0=time_abc.min(), transmit=True, phase=False)
+	data_abc = pp.run(time_abc, sio2_abc, laser_abc, progress_bar=False, \
 		output=["rho","rho_fi","rho_ii","xi","Ekin","ibh","collision_freq_en","collision_freq_ee","electric_field"])
 	data_abc["ibh"] /= 2 # because we want the ibh rate for electrons only (without holes)
-	Ekinmax_abc = mis.Ekin_max(sio2_abc,laser_abc,E=data_abc["electric_field"],s="e")
+	Ekinmax_abc = pp.Ekin_max(sio2_abc,laser_abc,E=data_abc["electric_field"],s="e")
 	# print(Ekinmax_abc/c.e, data_abc["Ekin"].max()/c.e)
 
 	tau, fluence, N = 300e-15, 4.8e4, 10000
 	time_def = np.linspace(-2*tau, 2*tau, N)
-	sio2_def = mat.Material(index=1.5, bandgap=9.*c.e, rate_equation="dre", density=2e28, cross_section=1e-19, damping=1e15)
-	laser_def = las.Laser(wavelength=800e-9, pulse_duration=tau, fluence=fluence, t0=time_def.min(), transmit=True, phase=False)
-	data_def = run.run(time_def, sio2_def, laser_def, progress_bar=False, \
+	sio2_def = pp.Material(index=1.5, bandgap=9.*c.e, rate_equation="dre", density=2e28, cross_section=1e-19, damping=1e15)
+	laser_def = pp.Laser(wavelength=800e-9, pulse_duration=tau, fluence=fluence, t0=time_def.min(), transmit=True, phase=False)
+	data_def = pp.run(time_def, sio2_def, laser_def, progress_bar=False, \
 		output=["rho","rho_fi","rho_ii","xi","Ekin","ibh","collision_freq_en","collision_freq_ee","electric_field"])
 	data_def["ibh"] /= 2 # because we want the ibh rate for electrons only (without holes)
-	Ekinmax_def = mis.Ekin_max(sio2_def,laser_def,E=data_def["electric_field"],s="e")
+	Ekinmax_def = pp.Ekin_max(sio2_def,laser_def,E=data_def["electric_field"],s="e")
 	# print(Ekinmax_def/c.e, data_def["Ekin"].max()/c.e)
 
 

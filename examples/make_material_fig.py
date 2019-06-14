@@ -13,8 +13,8 @@ plt.rcParams.update({'font.size': 14})
 import scipy.constants as c
 import os
 
-import pyplasma.material as mat
-import pyplasma.laser as las
+import pyplasma as pp
+
 
 
 def Threshold(material,laser):
@@ -64,8 +64,8 @@ if __name__ == '__main__':
 			while abs(Fmax-Fmin) > tolerance:
 				F = np.exp((np.log(Fmax)+np.log(Fmin))/2)
 				t = np.linspace(-2*tau,2*tau,10*tau+1000)
-				laser = las.Laser(wavelength=800e-9, pulse_duration=tau,fluence=F*1e4,t0=t.min(),transmit=True)
-				material = mat.Material(rate_equation="dre",index=materials[m]["index"],bandgap=materials[m]["bandgap"], \
+				laser = pp.Laser(wavelength=800e-9, pulse_duration=tau,fluence=F*1e4,t0=t.min(),transmit=True)
+				material = pp.Material(rate_equation="dre",index=materials[m]["index"],bandgap=materials[m]["bandgap"], \
 					m_CB=materials[m]["m_CB"], m_VB=materials[m]["m_VB"], density=materials[m]["density"], \
 					cross_section=materials[m]["cross_section"],damping=materials[m]["damping"],recombination_rate=materials[m]["gr"])
 

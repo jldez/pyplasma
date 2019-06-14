@@ -11,7 +11,9 @@ plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams.update({'font.size': 14})
 import os
+
 from pyplasma import impact_ionization as ii
+
 
 if __name__ == '__main__':
 

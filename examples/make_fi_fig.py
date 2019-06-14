@@ -13,19 +13,16 @@ plt.rcParams.update({'font.size': 14})
 import scipy.constants as c
 import os
 
-import pyplasma.material as mat
-import pyplasma.laser as las
-import pyplasma.field_ionization as fi
-
+import pyplasma as pp
 
 
 
 if __name__ == '__main__':
 
-	Eg1 = mat.Material(index=1.5, bandgap=9.*c.e, m_CB=1, m_VB=1, density=2e28)
-	Eg2 = mat.Material(index=1.5, bandgap=7.*c.e, m_CB=1, m_VB=1, density=2e28)
-	Eg3 = mat.Material(index=1.5, bandgap=5.*c.e, m_CB=1, m_VB=1, density=2e28)
-	laser = las.Laser(wavelength=800e-9)
+	Eg1 = pp.Material(index=1.5, bandgap=9.*c.e, m_CB=1, m_VB=1, density=2e28)
+	Eg2 = pp.Material(index=1.5, bandgap=7.*c.e, m_CB=1, m_VB=1, density=2e28)
+	Eg3 = pp.Material(index=1.5, bandgap=5.*c.e, m_CB=1, m_VB=1, density=2e28)
+	laser = pp.Laser(wavelength=800e-9)
 
 	N = 1000
 	Es = np.logspace(8,14,N)
@@ -33,9 +30,9 @@ if __name__ == '__main__':
 	fi_Eg1, fi_Eg2, fi_Eg3 = [], [], []
 	for E in Es:
 		laser.E = E
-		fi_Eg1.append(fi.fi_rate(Eg1,laser)/Eg1.density)
-		fi_Eg2.append(fi.fi_rate(Eg2,laser)/Eg2.density)
-		fi_Eg3.append(fi.fi_rate(Eg3,laser)/Eg3.density)
+		fi_Eg1.append(pp.fi_rate(Eg1,laser)/Eg1.density)
+		fi_Eg2.append(pp.fi_rate(Eg2,laser)/Eg2.density)
+		fi_Eg3.append(pp.fi_rate(Eg3,laser)/Eg3.density)
 	fi_Eg1 = np.array(fi_Eg1)
 	fi_Eg2 = np.array(fi_Eg2)
 	fi_Eg3 = np.array(fi_Eg3)

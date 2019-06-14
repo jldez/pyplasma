@@ -13,10 +13,7 @@ plt.rcParams.update({'font.size': 14})
 import os
 import scipy.constants as c
 
-import pyplasma.material as mat
-import pyplasma.laser as las
-import pyplasma.drude as dru
-
+import pyplasma as pp
 
 
 if __name__ == '__main__':
@@ -26,9 +23,9 @@ if __name__ == '__main__':
 	ax1,ax2,ax3,ax4 = f.add_subplot(2,3,4),f.add_subplot(2,3,5),f.add_subplot(2,3,6),f.add_subplot(2,1,1)
 	ax5 = ax4.twinx()
 
-	mat = mat.Material(damping=0e15, m_VB=0)
+	mat = pp.Material(damping=0e15, m_VB=0)
 	mat.rho = 4.008e18
-	laser = las.Laser(omega=1, E0=1, t0=-4.0*c.pi, phase=True)
+	laser = pp.Laser(omega=1, E0=1, t0=-4.0*c.pi, phase=True)
 
 	Nt = 10000 
 	t = np.linspace(-4.0*c.pi,1.2*c.pi,Nt)
@@ -36,7 +33,7 @@ if __name__ == '__main__':
 
 	def plot_J(ax,g):
 		mat.damping = g
-		laser = las.Laser(omega=1, E0=1, phase=True)
+		laser = pp.Laser(omega=1, E0=1, phase=True)
 		Es, Js = [], []
 		for tt in t:
 			laser.time_step(dt)

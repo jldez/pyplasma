@@ -14,8 +14,7 @@ import matplotlib.patches as patches
 import scipy.constants as c
 import os
 
-import pyplasma.material as mat
-import pyplasma.laser as las
+import pyplasma as pp
 
 
 
@@ -28,9 +27,9 @@ if __name__ == '__main__':
 	t = np.linspace(0,t_max*1e15,N)
 
 	# (a) SRE
-	sio2 = mat.Material(rate_equation="sre", index=1.5, bandgap=9.*c.e, alpha_sre=0.0004, \
+	sio2 = pp.Material(rate_equation="sre", index=1.5, bandgap=9.*c.e, alpha_sre=0.0004, \
 		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-	laser = las.Laser(wavelength=800e-9, phase=False, E0=E0_sre)
+	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_sre)
 
 	ii_contribution, ratio_sre = 0, []
 	for i in range(N):
@@ -40,9 +39,9 @@ if __name__ == '__main__':
 		ratio_sre.append(ii_contribution/sio2.rho)
 
 	# (a) MRE
-	sio2 = mat.Material(rate_equation="mre", index=1.5, bandgap=9.*c.e, \
+	sio2 = pp.Material(rate_equation="mre", index=1.5, bandgap=9.*c.e, \
 		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-	laser = las.Laser(wavelength=800e-9, phase=False, E0=E0_mre)
+	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_mre)
 
 	ii_contribution, ratio_mre = 0, []
 	for i in range(N):
@@ -52,9 +51,9 @@ if __name__ == '__main__':
 		ratio_mre.append(ii_contribution/sio2.rho)
 
 	# (a) DRE
-	sio2 = mat.Material(rate_equation="dre", index=1.5, bandgap=9.*c.e, \
+	sio2 = pp.Material(rate_equation="dre", index=1.5, bandgap=9.*c.e, \
 		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-	laser = las.Laser(wavelength=800e-9, phase=False, E0=E0_dre)
+	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_dre)
 
 	ii_contribution, ratio_dre = 0, []
 	for i in range(N):
@@ -71,9 +70,9 @@ if __name__ == '__main__':
 	# (b) SRE
 	ratio_sre2 = []
 	for i in range(NF):
-		sio2 = mat.Material(rate_equation="sre", index=1.5, bandgap=9.*c.e, alpha_sre=0.0004, \
+		sio2 = pp.Material(rate_equation="sre", index=1.5, bandgap=9.*c.e, alpha_sre=0.0004, \
 			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-		laser = las.Laser(wavelength=800e-9, phase=False, E0=E0_sre*factorF[i]**2.)
+		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_sre*factorF[i]**2.)
 		ii_contribution = 0
 		for n in t:
 			laser.time_step(dt)
@@ -85,9 +84,9 @@ if __name__ == '__main__':
 	# (b) MRE
 	ratio_mre2 = []
 	for i in range(NF):
-		sio2 = mat.Material(rate_equation="mre", index=1.5, bandgap=9.*c.e, \
+		sio2 = pp.Material(rate_equation="mre", index=1.5, bandgap=9.*c.e, \
 			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-		laser = las.Laser(wavelength=800e-9, phase=False, E0=E0_mre*factorF[i]**2.)
+		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_mre*factorF[i]**2.)
 		ii_contribution = 0
 		for n in t:
 			laser.time_step(dt)
@@ -99,9 +98,9 @@ if __name__ == '__main__':
 	# (b) MRE
 	ratio_dre2 = []
 	for i in range(NF):
-		sio2 = mat.Material(rate_equation="dre", index=1.5, bandgap=9.*c.e, \
+		sio2 = pp.Material(rate_equation="dre", index=1.5, bandgap=9.*c.e, \
 			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-		laser = las.Laser(wavelength=800e-9, phase=False, E0=E0_dre*factorF[i]**2.)
+		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_dre*factorF[i]**2.)
 		ii_contribution = 0
 		for n in t:
 			laser.time_step(dt)
