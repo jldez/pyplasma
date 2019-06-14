@@ -16,41 +16,6 @@ import os
 
 import pyplasma as pp
 
-# TO DO : Calculer Ekmax comme il faut. Gerer les output de calc proprement.
-
-
-def calc(N,tau,fluence):
-
-	tt = np.linspace(-2*tau, 2*tau, N)
-	laser = las.Laser(wavelength=800e-9, pulse_duration=tau, fluence=fluence, t0=tt.min(), transmit=True, phase=False)
-	sio2 = mat.Material(index=1.5, bandgap=9.*c.e, rate_equation="dre", density=2e28, cross_section=1e-19, damping=1e15)
-
-	rho, rho_fi, rho_ii, rho_xi = [], [], [], []
-	Ekin, g_en, ibh, g_ee = [], [], [], []
-	dt = tt[1] - tt[0]
-	for t in tt:
-		laser.time = t
-		laser.update_Electric_field(sio2)
-		sio2.update_rho(laser,dt)
-		rho.append(sio2.rho)
-		rho_fi.append(dt*sio2.rho_fi)
-		rho_ii.append(dt*sio2.rho_ii)
-		rho_xi.append(sio2.xi)
-		Ekin.append(sio2.Ekin)
-		g_en.append(mis.g_en(sio2))
-		ibh.append(dru.ibh(sio2,laser,s="e"))
-		g_ee.append(mis.g_ee(sio2))
-	rho = np.array(rho)
-	# print(rho[-1]/sio2.density)
-	rho_fi = np.cumsum(np.array(rho_fi))
-	rho_ii = np.cumsum(np.array(rho_ii))
-	rho_xi = np.array(rho_xi)
-	Ekin = np.array(Ekin)
-	g_en = np.array(g_en)
-	ibh = np.array(ibh)
-	g_ee = np.array(g_ee)
-	return [tt,rho/sio2.density,rho_xi*rho/sio2.density,rho_fi/sio2.density,rho_ii/sio2.density,Ekin,g_en,ibh,g_ee]
-
 
 
 def plot_dre(t,data,column,density,Ekinmax):
