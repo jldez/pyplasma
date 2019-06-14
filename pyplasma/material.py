@@ -21,22 +21,32 @@ class Material(object):
 
 	Arguments:
 		name (str): The name of the material, only used as an id.
+
 		rate_equation (str): The rate equation model to use when calculating plasma 
 			formation rate. Choose "single" or "sre" to use single rate equation. Choose 
 			"multiple" or "mre" for multiple rate equations. Choose "delayed" or "dre" for 
 			the delayed rate equations. Default is "delayed".
+
 		index (float): Linear refractive index. Default is 1.
+
 		bandgap (float): The bandgap between the conduction and the valence bands in Joules.
+
 		m_CB (float): The effective mass of the electrons in the conduction band in units of
 			their free space mass. Default is 1.
+
 		m_VB (float): The effective mass of the holes in the valence band in units of the
 			free space electron mass. Default is 1.
+
 		density (float): The density of atoms of molecules in 1/m^3.
+
 		cross_section (float): The cross section for the calculation of the collision rate 
 			between charge carriers and neutral atoms or molecules in 1/m^2.
+
 		damping (float): The damping rate of the plasma in 1/s. Default is 0.
+
 		recombination_rate (float): The recombination rate of the charge carriers in 1/s.
 			Default is 0.
+			
 		alpha_sre (float): The impact rate coefficient used if the rate equation is SRE in
 			m^2/J. Default is 0.
 		

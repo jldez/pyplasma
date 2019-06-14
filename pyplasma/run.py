@@ -14,6 +14,43 @@ from . import drude as dru
 
 
 def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=True):
+	"""
+	This function run an entire simulation of plasma formation in a 
+		dielectric irradiated by a laser.
+
+		Arguments:
+			Time (numpy array): 1D array containing all discrete times for the simulation.
+				Exemple: Time=np.linspace(start,end,N) where N is the number of time steps.
+
+			Material (Material object): The material in which the plasma formation
+				takes place.
+
+			Laser (Laser object): The laser that causes the plasma formation.
+
+			output (list): A list of strings. The strings indicate what data to output.
+				-"rho": plasma density
+				-"rho_fi": field ionization rate
+				-"rho_ii": impact ionization rate
+				-"xi": If the impact ionization model is DRE, xi is the fraction
+					of the electrons E_kin > E_c.
+				-"xi_h": Same as "xi", for holes.
+				-"Ekin": Mean kinetic energy of the electrons.
+				-"Ekin_h": Mean kinetic energy of the holes.
+				-"collision_freq_en": Electron-molecule collision frequency.
+				-"collision_freq_hn": Hole-molecule collision frequency.
+				-"collision_freq_ee": Electron-electron collision frequency.
+				-"ibh": Inverse Bremmstrahlung heating rate.
+				-"electric_field": Electric field of the laser.
+				-"Reflectivity": Reflectivity of the material.
+				Default is ["rho","electric_field"].
+
+			progress_bar (bool): If True, a progress bar will be displayed 
+				when running the simulation. Default is True.
+
+		Returns:
+			(dict): A dictionnary that contains all requested data. 
+				The keys correspond to the strings in the output argument.
+	"""
 
 	out_data = {}
 	for obj in output:

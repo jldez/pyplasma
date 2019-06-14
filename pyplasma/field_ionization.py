@@ -11,6 +11,21 @@ from scipy.special import ellipk,ellipe,dawsn
 
 # Keldysh ionisation
 def fi_rate(material, laser):
+	"""
+	Calculate the field ionization rate according to Keldysh's formula.
+
+		Arguments:
+			material (Material object): The material in which the plasma formation
+				takes place.
+
+			laser (Laser object): The laser that causes the plasma formation.
+
+		Returns:
+			fi_rate (float): The field ionization rate in 1/(sm^3). 
+			Divide by material's density to obtain the rate in 1/s.
+	"""
+
+
 	E = abs(laser.E)
 	if (E<1e3):
 		return 0.0

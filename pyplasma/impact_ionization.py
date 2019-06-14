@@ -13,6 +13,24 @@ from . import misc as mis
 
 
 def ii_rate(material,laser,dt):
+	"""
+	Calculate impact ionization rate according to the rate equation model chosen for the material.
+
+		Arguments:
+			material (Material object): The material in which the plasma formation
+				takes place.
+
+			laser (Laser object): The laser that causes the plasma formation.
+
+			dt (float): The time step of the simulation.
+
+		Returns:
+			ii_rate (float): The impact ionization rate in 1/(sm^3). 
+			Divide by material's density to obtain the rate in 1/s.
+
+	"""
+
+
 	if material.rate_equation.lower() in ["single","sre"]:
 		return sre(material,laser)
 	if material.rate_equation.lower() in ["multiple","mre"]:
@@ -22,12 +40,15 @@ def ii_rate(material,laser,dt):
 
 
 def sre(material,laser):
+	""" Single rate equation model """
+
 	intensity = c.c*material.index*c.epsilon_0*laser.E**2./2.
 	saturation = (material.density-material.rho)/material.density
 	return material.alpha_sre*material.rho*intensity*saturation
 
 
 def mre(material,laser,dt):
+	""" Multiple rate equation model """
 
 	if len(material.rho_k) == 0:
 		Ep = c.e**2.0*laser.E0**2.0/(4.0*material.m_red*(material.damping**2.0+laser.omega**2.0))
@@ -70,6 +91,7 @@ def mre(material,laser,dt):
 
 
 def dre(material,laser,dt):
+	""" Delayed rate equation model """
 
 	ibh = dru.ibh(material,laser,s="e")
 	ibh_h = dru.ibh(material,laser,s="h")

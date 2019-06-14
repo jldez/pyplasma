@@ -11,21 +11,30 @@ import scipy.constants as c
 
 class Laser(object):
 	"""
+	Define the laser properties and state.
+
 	Arguments:
 		wavelength (float): The wavelength of the laser in m.
+
 		omega (float): The angular frequency of the laser in 1/s. Either the wavelength
 			or omega can be specified and the other will be automatically calculated.
+
 		phase (bool): If True, the instantaneous electric field is multiplied by the
 			function cos(omega*time) to account for sub-cycle effects. If False,
 			only the envelope (cycle-averaged field) of the laser is accounted for.
 			Default is False.
+
 		pulse_duration (float): The pulse duration in seconds is the FWHM of the 
 			gaussian laser pulse. Default is np.inf, which means that the laser is
 			continuous.
+
 		fluence (float): The fluence of the laser pulse in J/m^2.
+
 		E0 (float): The amplitude of the electric field in V/m. Either the fluence
 			or E0 has to be specified and the other is automatically calculated.
+
 		t0 (float): The time at which the laser is initialized in seconds. Default is 0.
+
 		transmit (bool): If True, the amplitude of the electric field is multiplied
 			by its transmisibility in a material. In that case, when calling the method
 			update_Electric_field(), the material has to be an argument. Default is False.
@@ -64,6 +73,14 @@ class Laser(object):
 
 
 	def update_Electric_field(self, material=0):
+		"""
+		Calculate the instantaneous electric field value at the current time.
+
+		Arguments:
+			material (Material object): If Laser.transmit = True, the material
+				has to be specified in the arguments. 
+		"""
+
 		self.E = self.E0
 		# Gaussian pulse shape
 		self.E *= np.exp(-2.*np.log(2.)*(self.time/self.pulse_duration)**2.)
