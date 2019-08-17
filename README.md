@@ -1,5 +1,5 @@
 # pyplasma
-Python package for plasma formation modelling in a dielectric irradiated by intense laser field. Single rate equation (SRE), multiple rate equations (MRE) and the delayed rate equations models are implemented. See the paper [URL].
+Python package for plasma formation modelling in a dielectric irradiated by intense laser field. Single rate equation (SRE), multiple rate equations (MRE) and the delayed rate equations models are implemented. See the paper https://arxiv.org/abs/1906.08338.
 
 # Installation
 After cloning the repository, run
