@@ -53,11 +53,15 @@ class Material(object):
 	"""
 
 	def __init__(self, name="", rate_equation="delayed", index=1, bandgap=0, m_CB=1, m_VB=1, \
-				 density=0, cross_section=0, damping=0, recombination_rate=0, alpha_sre=0):
+				 density=0, cross_section=0, damping=0, recombination_rate=0, alpha_sre=0, \
+				 chi2=0, chi3=0, resonance=0):
 		super(Material, self).__init__()
 		self.name = name
 		self.rate_equation = rate_equation
 		self.index = index
+		self.chi2 = chi2
+		self.chi3 = chi3
+		self.resonance = resonance
 		self.bandgap = bandgap
 		self.m_CB = m_CB*c.m_e
 		self.m_VB = m_VB*c.m_e
@@ -85,6 +89,14 @@ class Material(object):
 		self.Ekin = 0
 		self.Ekin_h = 0
 		self.electric_current = 0
+
+
+	def __copy__(self):
+		return Material(name=self.name, rate_equation=self.rate_equation, \
+						index=self.index, bandgap=self.bandgap, m_CB=self.m_CB/c.m_e, \
+						m_VB=self.m_VB/c.m_e, density=self.density, \
+						cross_section=self.cross_section, damping=self.damping, \
+						recombination_rate=self.recombination_rate, alpha_sre=self.alpha_sre)
 
 
 	def plasma_freq(self):

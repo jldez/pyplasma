@@ -7,6 +7,7 @@ from __future__ import print_function,division
 import numpy as np
 import scipy.constants as c
 import tqdm
+import copy
 
 from . import misc as mis
 from . import drude as dru
@@ -97,3 +98,109 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 		out_data[obj] = np.array(out_data[obj])
 
 	return out_data
+
+
+
+
+def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, progress_bar=True):
+
+	# Todo : generate keldysh rate table at beginning abd then use it.
+
+	out_data = {}
+	for obj in output:
+		out_data[obj] = []
+
+	dt = abs(Time[1]-Time[0])
+	# print(dt/Domain.dx*c.c)
+
+	if progress_bar:
+		Time = tqdm.tqdm(Time)
+
+
+	w0, chi1, chi2, chi3 = [],[],[],[]
+	for i in range(len(Domain.x)):
+		try:
+			w0.append(2*c.pi*c.c/Domain.medium[i].resonance)
+			chi1.append(Domain.medium[i].index**2 -1.)
+			chi2.append(Domain.medium[i].chi2)
+			chi3.append(Domain.medium[i].chi3)
+		except:
+			w0.append(0.)
+			chi1.append(0.)
+			chi2.append(0.)
+			chi3.append(0.)
+
+	for t in Time:
+	
+		# Update ionization state
+		for i in range(len(Domain.x)):
+			try:
+				fake_laser = Fake_Laser(Domain.fields['E'][i],Domain.lasers[0]['laser'].omega,Domain.lasers[0]['laser'].E0)
+				Domain.medium[i].update_rho(fake_laser, dt)
+			except:
+				continue
+			
+
+		# Update bounded currents
+		P = c.epsilon_0*(chi1*Domain.fields['E']+chi2*Domain.fields['E']**2+chi3*Domain.fields['E']**3)
+		Domain.fields['Jb'] = Domain.fields['Jb'] + dt*np.array(w0)**2*(P - Domain.fields['P'])
+		Domain.fields['P'] += dt*Domain.fields['Jb']
+
+	
+
+
+		# Propagate
+		A = (c.epsilon_0 - dt*Domain.sigma_pml/2)/(c.epsilon_0 + dt/2*Domain.sigma_pml)
+		B = dt/Domain.dx/(c.epsilon_0 + dt*Domain.sigma_pml/2)*c.epsilon_0/c.mu_0
+		C = c.mu_0/c.epsilon_0*B
+
+		Domain.fields['H'][:-1] = A[:-1]*Domain.fields['H'][:-1]\
+								 -B[:-1]*(Domain.fields['E'][1:]-Domain.fields['E'][:-1])
+		Domain.fields['E'][1:-1] = A[1:-1]*Domain.fields['E'][1:-1]\
+								  -C[1:-1]*(Domain.fields['H'][1:-1]-Domain.fields['H'][:-2])\
+								  -dt*(Domain.fields['Jb'][1:-1])/c.epsilon_0
+
+
+
+
+
+		# Update laser sources
+		for las in Domain.lasers:
+			las['laser'].time = t
+			ind_las = np.argmin(np.abs(las['x']-Domain.x))
+			las['laser'].update_Electric_field(Domain.medium[ind_las])
+			Domain.fields['E'][ind_las] += las['laser'].E #todo : make sure to add source on top of E
+
+		# Output data
+		if 'rho' in output:
+			rho = []
+			for i in range(len(Domain.x)):
+				try:
+					rho.append(Domain.medium[i].rho)
+				except:
+					rho.append(0.)
+			out_data["rho"].append(rho)
+		if "electric_field" in output:
+			out_data["electric_field"].append(copy.copy(Domain.fields['E']))
+		if "bounded_current" in output:
+			out_data["bounded_current"].append(copy.copy(Domain.fields['Jb']))
+
+	if remove_pml:
+		Domain.remove_pml()
+	for obj in out_data:
+		out_data[obj] = np.array(out_data[obj])
+		if remove_pml:
+			if Domain.nb_pml > 0:
+				try:
+					out_data[obj] = out_data[obj][:,Domain.nb_pml:-Domain.nb_pml]
+				except:
+					pass
+
+	return out_data
+
+
+class Fake_Laser(object):
+	def __init__(self, E, omega, E0=0):
+		self.E = E
+		self.omega = omega
+		self.E0 = E0
