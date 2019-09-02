@@ -105,9 +105,9 @@ def dre(material,laser,dt):
 
 	temp, temp2 = material.Ekin, material.Ekin_h
 	material.Ekin += dt*(ibh*c.hbar*laser.omega - coll_freq_en*xi_e*Ec - \
-		material.Ekin*(material.rho_fi/(material.rho+1e-100) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
+		material.Ekin*(material.rho_fi/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
 	material.Ekin_h += dt*(ibh_h*c.hbar*laser.omega - coll_freq_hn*xi_h*Ec - \
-		material.Ekin_h*(material.rho_fi/(material.rho+1e-100) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
+		material.Ekin_h*(material.rho_fi/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
 
 	return material.rho*(coll_freq_en*xi_e + coll_freq_hn*xi_h)
 

@@ -27,7 +27,7 @@ class Domain(object):
 		self.construct_domain()
 
 		self.fields = {}
-		for field in ['E','H','P','Jb']:
+		for field in ['E','H','P','Jb','Jf','Jfi']:
 			self.fields[field] = np.zeros(len(self.x))
 
 
@@ -67,6 +67,9 @@ class Domain(object):
 		else:
 			n0_pml_max = self.medium[-1].index
 
+		# Add None material in pml
+		self.medium = np.hstack([[None for i in range(self.nb_pml)],self.medium,[None for i in range(self.nb_pml)]])
+
 
 		m = 3 #grading order for sigma
 		self.sigma_pml = np.zeros(len(self.x))
@@ -83,5 +86,75 @@ class Domain(object):
 	def remove_pml(self):
 		if self.nb_pml > 0:
 			self.x = self.x[self.nb_pml:-self.nb_pml]
+			self.medium = self.medium[self.nb_pml:-self.nb_pml]
 			for field in self.fields:
 				self.fields[field] = self.fields[field][self.nb_pml:-self.nb_pml]
+
+
+	def get_rho(self):
+		rho = []
+		for i in range(len(self.x)):
+			try:
+				rho.append(self.medium[i].rho)
+			except:
+				rho.append(0.)
+		return np.array(rho)
+
+	def get_rho_fi(self):
+		rho_fi = []
+		for i in range(len(self.x)):
+			try:
+				rho_fi.append(self.medium[i].rho_fi)
+			except:
+				rho_fi.append(0.)
+		return np.array(rho_fi)
+
+	def get_resonance(self):
+		resonance = []
+		for i in range(len(self.x)):
+			try:
+				resonance.append(self.medium[i].resonance)
+			except:
+				resonance.append(np.inf)
+		return np.array(resonance)
+
+	def get_chis(self):
+		chis = []
+		for i in range(len(self.x)):
+			try:
+				chi1 = self.medium[i].index**2 -1.
+				chis.append([chi1,self.medium[i].chi2,self.medium[i].chi3])
+			except:
+				chis.append([0.,0.,0.])
+		chis = np.array(chis)
+		if self.nb_pml > 0:
+			chis[:self.nb_pml,0] = chis[self.nb_pml,0]
+			chis[-self.nb_pml:,0] = chis[-self.nb_pml-1,0]
+		return chis
+
+	def get_damping(self):
+		damping = []
+		for i in range(len(self.x)):
+			try:
+				damping.append(self.medium[i].damping)
+			except:
+				damping.append(0.)
+		return np.array(damping)
+
+	def get_m_red(self):
+		m_red = []
+		for i in range(len(self.x)):
+			try:
+				m_red.append(self.medium[i].m_red)
+			except:
+				m_red.append(1.)
+		return np.array(m_red)
+
+	def get_bandgap(self):
+		bandgap = []
+		for i in range(len(self.x)):
+			try:
+				bandgap.append(self.medium[i].bandgap)
+			except:
+				bandgap.append(0.)
+		return np.array(bandgap)

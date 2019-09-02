@@ -6,6 +6,7 @@
 from __future__ import print_function,division
 import numpy as np
 import scipy.constants as c
+from scipy.interpolate import *
 import cmath
 
 from . import drude
@@ -107,7 +108,11 @@ class Material(object):
 							  + dt*c.epsilon_0*self.plasma_freq()*laser.E
 
 	def update_rho(self, laser, dt):
-		self.rho_fi = fi.fi_rate(self,laser)*(self.density-self.rho)/self.density
+		try:
+			# Much faster to do linear interpolation even if log interpolation should be done instead.
+			self.rho_fi = np.interp(np.abs(laser.E), self.fi_table[:,0], self.fi_table[:,1])*(self.density-self.rho)/self.density
+		except:
+			self.rho_fi = fi.fi_rate(self,laser)*(self.density-self.rho)/self.density
 		self.rho_ii = ii.ii_rate(self,laser,dt)
 		self.rho_re = self.recombination_rate*self.rho
 		self.rho += dt*(self.rho_fi + self.rho_ii - self.rho_re)
@@ -122,7 +127,16 @@ class Material(object):
 		self.reflectivity = abs((n-1.)/(n+1.))**2.
 		return self.reflectivity
 
+	def add_fi_table(self, fi_table):
+		self.fi_table = fi_table
 
+
+
+def log_interp(zz, xx, yy):
+	logz = np.log10(zz)
+	logx = np.log10(xx)
+	logy = np.log10(yy)
+	return np.power(10.0, np.interp(logz, logx, logy))
 
 
 

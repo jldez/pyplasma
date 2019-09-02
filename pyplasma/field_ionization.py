@@ -7,10 +7,13 @@ from __future__ import print_function,division
 import numpy as np
 import scipy.constants as c
 from scipy.special import ellipk,ellipe,dawsn
+import tqdm
+
+from . import laser as las
 
 
 # Keldysh ionisation
-def fi_rate(material, laser):
+def fi_rate(material, laser, tol=1e-3):
 	"""
 	Calculate the field ionization rate according to Keldysh's formula.
 
@@ -25,10 +28,12 @@ def fi_rate(material, laser):
 			Divide by material's density to obtain the rate in 1/s.
 	"""
 
-
 	E = abs(laser.E)
 	if (E<1e3):
 		return 0.0
+
+	# if fi_table != None and laser.E <= fi_table[0,-1]:
+	# 	return interp(E, fi_table[0,:], fi_table[1,:])
 
 	def CEI1(a):
 		return ellipk(a)
@@ -56,7 +61,7 @@ def fi_rate(material, laser):
 		sol,err,n = 0.0,1e10,0
 		c1=(CEI1(g1(E))-CEI2(g1(E)))/CEI2(g2(E))
 		c2=2.0*CEI1(g2(E))*CEI2(g2(E))
-		while (err > 1e-3):
+		while (err > tol):
 			term = np.exp(-n*c.pi*c1)*DI(c.pi*((np.floor(g3(E)+1.0)-g3(E)+n)/c2)**0.5)
 			sol = sol + term
 			n = n+1
@@ -67,6 +72,25 @@ def fi_rate(material, laser):
 		*np.exp(-c.pi*np.floor(g3(E)+1)*(CEI1(g1(E))-CEI2(g1(E)))/CEI2(g2(E)))
 
 
+
+
+def fi_table(material, laser, N=1e3, tol=1e-3, output=None, progress_bar=True):
+
+	Es = np.logspace(3,np.log10(5*laser.E0),N)
+	table = []
+
+	if progress_bar:
+		Es = tqdm.tqdm(Es)
+
+	for E in Es:
+		fake_laser = las.Fake_Laser(E=E, omega=laser.omega)
+		rate = fi_rate(material, fake_laser, tol=tol)
+		table.append([E,rate])
+	table = np.array(table)
+
+	if output != None:
+		np.save(output+'.npy', table)
+	return table
 
 
 

@@ -97,5 +97,14 @@ class Laser(object):
 		self.update_Electric_field()
 
 
+
+
+class Fake_Laser(object):
+	def __init__(self, E, omega, E0=0):
+		self.E = E
+		self.omega = omega
+		self.E0 = E0
+
+
 if __name__ == '__main__':
 	pass

@@ -11,6 +11,8 @@ import copy
 
 from . import misc as mis
 from . import drude as dru
+from . import laser as las
+from . import field_ionization as fi
 
 
 
@@ -102,9 +104,9 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 
 
 
-def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, progress_bar=True):
 
-	# Todo : generate keldysh rate table at beginning abd then use it.
+
+def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, accelerate_fi=True, progress_bar=True):
 
 	out_data = {}
 	for obj in output:
@@ -116,37 +118,50 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 	if progress_bar:
 		Time = tqdm.tqdm(Time)
 
+	resonance = Domain.get_resonance()
+	chis = Domain.get_chis()
+	damping = Domain.get_damping()
+	m_red = Domain.get_m_red()
+	bandgap = Domain.get_bandgap()
 
-	w0, chi1, chi2, chi3 = [],[],[],[]
-	for i in range(len(Domain.x)):
-		try:
-			w0.append(2*c.pi*c.c/Domain.medium[i].resonance)
-			chi1.append(Domain.medium[i].index**2 -1.)
-			chi2.append(Domain.medium[i].chi2)
-			chi3.append(Domain.medium[i].chi3)
-		except:
-			w0.append(0.)
-			chi1.append(0.)
-			chi2.append(0.)
-			chi3.append(0.)
+	fi_table = []
+	if accelerate_fi:
+		for mat in Domain.materials:
+			fi_table.append(fi.fi_table(mat['material'], Domain.lasers[0]['laser'], \
+										N=5e3, tol=1e-3, output=None, progress_bar=False))
+		for i in range(len(Domain.x)):
+			try:
+				ind = 0 # todo: assign the table to the correct material
+				Domain.medium[i].add_fi_table(fi_table[ind])
+			except:
+				pass
+
 
 	for t in Time:
 	
 		# Update ionization state
 		for i in range(len(Domain.x)):
 			try:
-				fake_laser = Fake_Laser(Domain.fields['E'][i],Domain.lasers[0]['laser'].omega,Domain.lasers[0]['laser'].E0)
+				fake_laser = las.Fake_Laser(Domain.fields['E'][i],Domain.lasers[0]['laser'].omega,Domain.lasers[0]['laser'].E0)
 				Domain.medium[i].update_rho(fake_laser, dt)
 			except:
-				continue
-			
+				pass
+		rho = Domain.get_rho()
+		rho_fi = Domain.get_rho_fi()
+
+		# Update mpi interband currents
+		Domain.fields['Jfi'] = bandgap*rho_fi*Domain.fields['E']/(Domain.fields['E']+1.0)**2.0
 
 		# Update bounded currents
-		P = c.epsilon_0*(chi1*Domain.fields['E']+chi2*Domain.fields['E']**2+chi3*Domain.fields['E']**3)
-		Domain.fields['Jb'] = Domain.fields['Jb'] + dt*np.array(w0)**2*(P - Domain.fields['P'])
+		w0 = 2*c.pi*c.c/resonance
+		P = c.epsilon_0*(chis[:,0]*Domain.fields['E']+chis[:,1]*Domain.fields['E']**2+chis[:,2]*Domain.fields['E']**3)
+		Domain.fields['Jb'] = Domain.fields['Jb'] + dt*w0**2*(P - Domain.fields['P'])
 		Domain.fields['P'] += dt*Domain.fields['Jb']
 
-	
+		# Update free currents
+		G = damping*dt/2
+		omega_p = abs(c.e**2*rho/(c.epsilon_0*m_red))**.5
+		Domain.fields['Jf'] = Domain.fields['Jf']*(1-G)/(1+G) + dt*c.epsilon_0*omega_p**2.0*Domain.fields['E']/(1+G)
 
 
 		# Propagate
@@ -158,32 +173,30 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 								 -B[:-1]*(Domain.fields['E'][1:]-Domain.fields['E'][:-1])
 		Domain.fields['E'][1:-1] = A[1:-1]*Domain.fields['E'][1:-1]\
 								  -C[1:-1]*(Domain.fields['H'][1:-1]-Domain.fields['H'][:-2])\
-								  -dt*(Domain.fields['Jb'][1:-1])/c.epsilon_0
-
-
-
+								  -dt*(Domain.fields['Jb'][1:-1])/c.epsilon_0\
+								  -dt*(Domain.fields['Jf'][1:-1])/c.epsilon_0\
+								  -dt*(Domain.fields['Jfi'][1:-1])/c.epsilon_0
 
 
 		# Update laser sources
-		for las in Domain.lasers:
-			las['laser'].time = t
-			ind_las = np.argmin(np.abs(las['x']-Domain.x))
-			las['laser'].update_Electric_field(Domain.medium[ind_las])
-			Domain.fields['E'][ind_las] += las['laser'].E #todo : make sure to add source on top of E
+		for l in Domain.lasers:
+			l['laser'].time = t
+			ind_las = np.argmin(np.abs(l['x']-Domain.x))
+			l['laser'].update_Electric_field(Domain.medium[ind_las])
+			Domain.fields['E'][ind_las] += l['laser'].E #todo : make sure to add source on top of E
+
 
 		# Output data
 		if 'rho' in output:
-			rho = []
-			for i in range(len(Domain.x)):
-				try:
-					rho.append(Domain.medium[i].rho)
-				except:
-					rho.append(0.)
 			out_data["rho"].append(rho)
 		if "electric_field" in output:
 			out_data["electric_field"].append(copy.copy(Domain.fields['E']))
 		if "bounded_current" in output:
 			out_data["bounded_current"].append(copy.copy(Domain.fields['Jb']))
+		if "free_current" in output:
+			out_data["free_current"].append(copy.copy(Domain.fields['Jf']))
+		if "fi_current" in output:
+			out_data["fi_current"].append(copy.copy(Domain.fields['Jfi']))
 
 	if remove_pml:
 		Domain.remove_pml()
@@ -198,9 +211,3 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 
 	return out_data
 
-
-class Fake_Laser(object):
-	def __init__(self, E, omega, E0=0):
-		self.E = E
-		self.omega = omega
-		self.E0 = E0
