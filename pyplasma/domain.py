@@ -13,6 +13,8 @@ from . import laser
 
 class Domain(object):
 
+	# Supports only one laser source
+
 	def __init__(self, length, Nx, x0=0, lasers=[{'x':0,'laser':None}], \
 				 materials=[{'x_min':0,'x_max':-1,'material':None}], pml_width=0):
 

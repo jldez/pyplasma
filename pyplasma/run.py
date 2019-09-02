@@ -113,13 +113,13 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 		out_data[obj] = []
 
 	dt = abs(Time[1]-Time[0])
-	# print(dt/Domain.dx*c.c)
+	chis = Domain.get_chis()
+	print('Stability condition : dt = {:f} * dt_max'.format(dt/Domain.dx*c.c*(chis[:,0].max()+1)**0.5))
 
 	if progress_bar:
 		Time = tqdm.tqdm(Time)
 
 	resonance = Domain.get_resonance()
-	chis = Domain.get_chis()
 	damping = Domain.get_damping()
 	m_red = Domain.get_m_red()
 	bandgap = Domain.get_bandgap()
@@ -183,7 +183,7 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 			l['laser'].time = t
 			ind_las = np.argmin(np.abs(l['x']-Domain.x))
 			l['laser'].update_Electric_field(Domain.medium[ind_las])
-			Domain.fields['E'][ind_las] += l['laser'].E #todo : make sure to add source on top of E
+			Domain.fields['E'][ind_las] = l['laser'].E #todo : is it correct to force it like that?
 
 
 		# Output data
