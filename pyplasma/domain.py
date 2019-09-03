@@ -8,21 +8,17 @@ import numpy as np
 import scipy.constants as c
 import copy
 
-from . import laser
-
 
 class Domain(object):
 
-	# Supports only one laser source
-
-	def __init__(self, length, Nx, x0=0, lasers=[{'x':0,'laser':None}], \
+	def __init__(self, length, Nx, x0=0, Laser=None, \
 				 materials=[{'x_min':0,'x_max':-1,'material':None}], pml_width=0):
 
 		super(Domain, self).__init__()
 		self.length = length
 		self.Nx = Nx
 		self.x0 = x0
-		self.lasers = lasers
+		self.Laser = Laser
 		self.materials = materials
 		self.pml_width = pml_width
 
@@ -39,6 +35,7 @@ class Domain(object):
 
 		self.add_materials()
 		self.add_pml()
+		self.las_ind = self.get_laser_position_index()
 			
 
 	def add_materials(self):
@@ -50,6 +47,8 @@ class Domain(object):
 				else:
 					self.medium.append(None)
 
+	def get_laser_position_index(self):
+		return np.argmin(np.abs(self.Laser.pos-self.x))
 
 
 	def add_pml(self):

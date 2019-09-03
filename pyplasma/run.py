@@ -107,6 +107,9 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 
 
 def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, accelerate_fi=True, progress_bar=True):
+	# TFSF implementation might not be perfect. See references:
+	# Section 3.0 of : https://studylib.net/doc/8392930/6.-total-field---scattered-field-fdtd-implementation-in-m...
+	# Section 3.10 of : https://www.eecs.wsu.edu/~schneidj/ufdtd/chap3.pdf
 
 	out_data = {}
 	for obj in output:
@@ -138,11 +141,15 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 
 
 	for t in Time:
-	
+
+		# Update laser source
+		Domain.Laser.time = t
+		Domain.Laser.update_Electric_field(Domain.medium[Domain.las_ind])
+
 		# Update ionization state
 		for i in range(len(Domain.x)):
 			try:
-				fake_laser = las.Fake_Laser(Domain.fields['E'][i],Domain.lasers[0]['laser'].omega,Domain.lasers[0]['laser'].E0)
+				fake_laser = las.Fake_Laser(Domain.fields['E'][i],Domain.Laser.omega,Domain.Laser.E0)
 				Domain.medium[i].update_rho(fake_laser, dt)
 			except:
 				pass
@@ -163,40 +170,36 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 		omega_p = abs(c.e**2*rho/(c.epsilon_0*m_red))**.5
 		Domain.fields['Jf'] = Domain.fields['Jf']*(1-G)/(1+G) + dt*c.epsilon_0*omega_p**2.0*Domain.fields['E']/(1+G)
 
+		
 
-		# Propagate
+		# Coefficients for FDTD scheme
 		A = (c.epsilon_0 - dt*Domain.sigma_pml/2)/(c.epsilon_0 + dt/2*Domain.sigma_pml)
 		B = dt/Domain.dx/(c.epsilon_0 + dt*Domain.sigma_pml/2)*c.epsilon_0/c.mu_0
 		C = c.mu_0/c.epsilon_0*B
 
+		# Update magnetic field
 		Domain.fields['H'][:-1] = A[:-1]*Domain.fields['H'][:-1]\
 								 -B[:-1]*(Domain.fields['E'][1:]-Domain.fields['E'][:-1])
+
+		# Magnetic field correction for TFSF laser source
+		if source_mode == 'TFSF':
+			Domain.fields['H'][Domain.las_ind] += dt/(c.mu_0*Domain.dx)*Domain.Laser.E
+
+		# Update electric field
 		Domain.fields['E'][1:-1] = A[1:-1]*Domain.fields['E'][1:-1]\
 								  -C[1:-1]*(Domain.fields['H'][1:-1]-Domain.fields['H'][:-2])\
 								  -dt*(Domain.fields['Jb'][1:-1])/c.epsilon_0\
 								  -dt*(Domain.fields['Jf'][1:-1])/c.epsilon_0\
 								  -dt*(Domain.fields['Jfi'][1:-1])/c.epsilon_0
 
+		# Electric field correction for TFSF laser source
+		if source_mode == 'TFSF':
+			Domain.fields['E'][Domain.las_ind] += dt/(c.epsilon_0*Domain.dx)*Domain.Laser.E/(120*c.pi)
 
-		# Update laser sources
-		for l in Domain.lasers:
-			l['laser'].time = t
-			ind_las = np.argmin(np.abs(l['x']-Domain.x))
-			l['laser'].update_Electric_field(Domain.medium[ind_las])
-			Domain.fields['E'][ind_las] = l['laser'].E #todo : is it correct to force it like that?
+		# Hard source update
+		if source_mode == 'hard':
+			Domain.fields['E'][Domain.las_ind] = Domain.Laser.E
 
-
-		# Output data
-		if 'rho' in output:
-			out_data["rho"].append(rho)
-		if "electric_field" in output:
-			out_data["electric_field"].append(copy.copy(Domain.fields['E']))
-		if "bounded_current" in output:
-			out_data["bounded_current"].append(copy.copy(Domain.fields['Jb']))
-		if "free_current" in output:
-			out_data["free_current"].append(copy.copy(Domain.fields['Jf']))
-		if "fi_current" in output:
-			out_data["fi_current"].append(copy.copy(Domain.fields['Jfi']))
 
 	if remove_pml:
 		Domain.remove_pml()

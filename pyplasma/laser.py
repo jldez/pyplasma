@@ -41,7 +41,7 @@ class Laser(object):
 	"""
 
 	def __init__(self, wavelength=0, omega=0, phase=False, pulse_duration=np.inf, \
-				 fluence=0, E0=0, t0=0, transmit=False):
+				 fluence=0, E0=0, t0=0, transmit=False, pos=0):
 		super(Laser, self).__init__()
 
 		self.wavelength = wavelength
@@ -56,6 +56,7 @@ class Laser(object):
 		self.phase = phase
 		self.pulse_duration = pulse_duration
 		self.transmit = transmit
+		self.pos = pos
 
 		self.E0 = E0
 		self.fluence = fluence
