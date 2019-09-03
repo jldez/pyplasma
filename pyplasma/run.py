@@ -106,7 +106,9 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 
 
 
-def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, accelerate_fi=True, progress_bar=True):
+def propagate(Time, Domain, output = ["rho","electric_field"], out_step=1, \
+			  remove_pml=True, accelerate_fi=True, source_mode='TFSF', progress_bar=True):
+
 	# TFSF implementation might not be perfect. See references:
 	# Section 3.0 of : https://studylib.net/doc/8392930/6.-total-field---scattered-field-fdtd-implementation-in-m...
 	# Section 3.10 of : https://www.eecs.wsu.edu/~schneidj/ufdtd/chap3.pdf
@@ -138,6 +140,7 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 						Domain.medium[i].add_fi_table(fi_table)
 
 
+	n=0
 	for t in Time:
 
 		# Update laser source
@@ -198,6 +201,20 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 		if source_mode == 'hard':
 			Domain.fields['E'][Domain.las_ind] = Domain.Laser.E
 
+		if n%out_step == 0:
+			# Output data
+			if 'rho' in output:
+				out_data["rho"].append(rho)
+			if "electric_field" in output:
+				out_data["electric_field"].append(copy.copy(Domain.fields['E']))
+			if "bounded_current" in output:
+				out_data["bounded_current"].append(copy.copy(Domain.fields['Jb']))
+			if "free_current" in output:
+				out_data["free_current"].append(copy.copy(Domain.fields['Jf']))
+			if "fi_current" in output:
+				out_data["fi_current"].append(copy.copy(Domain.fields['Jfi']))
+
+		n+=1
 
 	if remove_pml:
 		Domain.remove_pml()
