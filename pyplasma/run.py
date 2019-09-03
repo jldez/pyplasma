@@ -127,17 +127,15 @@ def propagate(Time, Domain, output = ["rho","electric_field"], remove_pml=True, 
 	m_red = Domain.get_m_red()
 	bandgap = Domain.get_bandgap()
 
-	fi_table = []
 	if accelerate_fi:
-		for mat in Domain.materials:
-			fi_table.append(fi.fi_table(mat['material'], Domain.lasers[0]['laser'], \
-										N=5e3, tol=1e-3, output=None, progress_bar=False))
-		for i in range(len(Domain.x)):
-			try:
-				ind = 0 # todo: assign the table to the correct material
-				Domain.medium[i].add_fi_table(fi_table[ind])
-			except:
-				pass
+		for m in range(len(Domain.materials)):
+			if Domain.materials[m]['material'] != None:
+				fi_table = fi.fi_table(Domain.materials[m]['material'], Domain.Laser, \
+								N=5e3, tol=1e-3, output=None, progress_bar=False)
+			for i in range(len(Domain.x)):
+				if Domain.x[i]>=Domain.materials[m]['x_min'] and Domain.x[i]<=Domain.materials[m]['x_max']:
+					if Domain.medium[i] != None:
+						Domain.medium[i].add_fi_table(fi_table)
 
 
 	for t in Time:

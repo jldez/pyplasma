@@ -40,12 +40,12 @@ class Domain(object):
 
 	def add_materials(self):
 		self.medium = []
-		for m in self.materials:
-			for i in range(self.Nx):
+		for i in range(self.Nx):
+			self.medium.append(None)
+			for m in self.materials:
 				if self.x[i] >= m['x_min'] and self.x[i] <= m['x_max']:
-					self.medium.append(copy.deepcopy(m['material']))
-				else:
-					self.medium.append(None)
+					self.medium[-1]=copy.deepcopy(m['material'])
+					
 
 	def get_laser_position_index(self):
 		return np.argmin(np.abs(self.Laser.pos-self.x))
