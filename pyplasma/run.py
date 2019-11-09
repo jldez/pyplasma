@@ -53,6 +53,10 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 		Returns:
 			(dict): A dictionnary that contains all requested data. 
 				The keys correspond to the strings in the output argument.
+
+
+	To do : - rho_fi should output the total ionization from fi
+			- add fi_rate to replace current rho_fi
 	"""
 
 	out_data = {}
@@ -107,7 +111,7 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 
 
 def propagate(Time, Domain, output = ["rho","electric_field"], out_step=1, \
-			  remove_pml=True, accelerate_fi=True, source_mode='TFSF', progress_bar=True):
+			  remove_pml=True, accelerate_fi=False, source_mode='TFSF', progress_bar=True):
 
 	# TFSF implementation might not be perfect. See references:
 	# Section 3.0 of : https://studylib.net/doc/8392930/6.-total-field---scattered-field-fdtd-implementation-in-m...
@@ -207,12 +211,20 @@ def propagate(Time, Domain, output = ["rho","electric_field"], out_step=1, \
 				out_data["rho"].append(rho)
 			if "electric_field" in output:
 				out_data["electric_field"].append(copy.copy(Domain.fields['E']))
+			if "magnetic_flux" in output:
+				out_data["magnetic_flux"].append(copy.copy(Domain.fields['H']))
 			if "bounded_current" in output:
 				out_data["bounded_current"].append(copy.copy(Domain.fields['Jb']))
 			if "free_current" in output:
 				out_data["free_current"].append(copy.copy(Domain.fields['Jf']))
 			if "fi_current" in output:
 				out_data["fi_current"].append(copy.copy(Domain.fields['Jfi']))
+			if 'ponderomotive_energy' in output:
+				out_data["ponderomotive_energy"].append(copy.copy(Domain.get_ponderomotive_energy(Domain.fields['E'])))
+			if 'ibh' in output:
+				out_data["ibh"].append(copy.copy(Domain.get_ibh(Domain.fields['E'])))
+			if 'kinetic_energy' in output:
+				out_data['kinetic_energy'].append(copy.copy(Domain.get_kinetic_energy()))
 
 		n+=1
 

@@ -8,6 +8,9 @@ import numpy as np
 import scipy.constants as c
 import copy
 
+from . import laser as las
+from . import drude as dru
+
 
 class Domain(object):
 
@@ -69,18 +72,18 @@ class Domain(object):
 			n0_pml_max = self.medium[-1].index
 
 		# Add None material in pml
-		self.medium = np.hstack([[None for i in range(self.nb_pml)],self.medium,[None for i in range(self.nb_pml)]])
+		self.medium = np.hstack([[self.medium[0] for i in range(self.nb_pml)],self.medium,[self.medium[-1] for i in range(self.nb_pml)]])
 
 
-		m = 3 #grading order for sigma
+		m = 2 #grading order for sigma
 		self.sigma_pml = np.zeros(len(self.x))
 
 		if self.nb_pml > 0:
 			# conductivity in first pml
-			sigma_max = (m+1)*8.0/(2*(c.mu_0/(c.epsilon_0*n0_pml_min**2.0))**0.5*self.nb_pml*self.dx)
+			sigma_max = (m+1)*9.0/(2*(c.mu_0/(c.epsilon_0*n0_pml_min**2.0))**0.5*self.nb_pml*self.dx)
 			self.sigma_pml[0:self.nb_pml] = np.linspace(1,0,self.nb_pml)**m*sigma_max
 			# conductivity in second pml
-			sigma_max = (m+1)*5.0/(2*(c.mu_0/(c.epsilon_0*n0_pml_max**2.0))**0.5*self.nb_pml*self.dx)
+			sigma_max = (m+1)*9.0/(2*(c.mu_0/(c.epsilon_0*n0_pml_max**2.0))**0.5*self.nb_pml*self.dx)
 			self.sigma_pml[self.Nx+self.nb_pml:self.Nx+2*self.nb_pml] = np.linspace(0,1,self.nb_pml)**m*sigma_max
 
 
@@ -127,11 +130,7 @@ class Domain(object):
 				chis.append([chi1,self.medium[i].chi2,self.medium[i].chi3])
 			except:
 				chis.append([0.,0.,0.])
-		chis = np.array(chis)
-		if self.nb_pml > 0:
-			chis[:self.nb_pml,0] = chis[self.nb_pml,0]
-			chis[-self.nb_pml:,0] = chis[-self.nb_pml-1,0]
-		return chis
+		return np.array(chis)
 
 	def get_damping(self):
 		damping = []
@@ -159,3 +158,35 @@ class Domain(object):
 			except:
 				bandgap.append(0.)
 		return np.array(bandgap)
+
+	def get_ponderomotive_energy(self, E):
+		ponderomotive_energy = []
+		for i in range(len(self.x)):
+			fake_laser = las.Fake_Laser(E[i],self.Laser.omega,self.Laser.E0)
+			try:
+				ponderomotive_energy.append(dru.Ep(self.medium[i], fake_laser))
+			except:
+				ponderomotive_energy.append(0.)
+		return np.array(ponderomotive_energy)
+
+	def get_ibh(self, E):
+		ibh = []
+		for i in range(len(self.x)):
+			fake_laser = las.Fake_Laser(E[i],self.Laser.omega,self.Laser.E0)
+			try:
+				ibh.append(dru.ibh(self.medium[i], fake_laser))
+			except:
+				ibh.append(0.)
+		return np.array(ibh)
+
+	def get_kinetic_energy(self):
+		kinetic_energy = []
+		for i in range(len(self.x)):
+			try:
+				kinetic_energy.append(self.medium[i].Ekin)
+			except:
+				kinetic_energy.append(0.)
+		return np.array(kinetic_energy)
+
+
+

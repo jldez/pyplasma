@@ -29,7 +29,7 @@ def fi_rate(material, laser, tol=1e-3):
 	"""
 
 	E = abs(laser.E)
-	if (E<1e3):
+	if (E<1e3) or material.rate_equation == 'None':
 		return 0.0
 
 	# if fi_table != None and laser.E <= fi_table[0,-1]:

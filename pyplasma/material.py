@@ -108,14 +108,15 @@ class Material(object):
 							  + dt*c.epsilon_0*self.plasma_freq()*laser.E
 
 	def update_rho(self, laser, dt):
-		try:
-			# Much faster to do linear interpolation even if log interpolation should be done instead.
-			self.rho_fi = np.interp(np.abs(laser.E), self.fi_table[:,0], self.fi_table[:,1])*(self.density-self.rho)/self.density
-		except:
-			self.rho_fi = fi.fi_rate(self,laser)*(self.density-self.rho)/self.density
-		self.rho_ii = ii.ii_rate(self,laser,dt)
-		self.rho_re = self.recombination_rate*self.rho
-		self.rho += dt*(self.rho_fi + self.rho_ii - self.rho_re)
+		if self.rate_equation != 'None':
+			try:
+				# Much faster to do linear interpolation even if log interpolation should be done instead.
+				self.rho_fi = np.interp(np.abs(laser.E), self.fi_table[:,0], self.fi_table[:,1])*(self.density-self.rho)/self.density
+			except:
+				self.rho_fi = fi.fi_rate(self,laser)*(self.density-self.rho)/self.density
+			self.rho_ii = ii.ii_rate(self,laser,dt)
+			self.rho_re = self.recombination_rate*self.rho
+			self.rho += dt*(self.rho_fi + self.rho_ii - self.rho_re)
 
 	def Drude_index(self, laser):
 		self.drude_index = cmath.sqrt(self.index**2. - \
