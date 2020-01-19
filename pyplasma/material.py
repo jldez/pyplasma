@@ -55,7 +55,7 @@ class Material(object):
 
 	def __init__(self, name="", rate_equation="delayed", index=1, bandgap=0, m_CB=1, m_VB=1, \
 				 density=0, cross_section=0, damping=0, recombination_rate=0, alpha_sre=0, \
-				 chi2=0, chi3=0, resonance=0):
+				 chi2=0, chi3=0, resonance=0, fi_damping_correction=False):
 		super(Material, self).__init__()
 		self.name = name
 		self.rate_equation = rate_equation
@@ -74,6 +74,7 @@ class Material(object):
 		self.cross_section = cross_section
 		self.damping = damping
 		self.recombination_rate = recombination_rate
+		self.fi_damping_correction = fi_damping_correction
 
 		if self.rate_equation.lower() in ["single","sre"]:
 			self.alpha_sre = alpha_sre

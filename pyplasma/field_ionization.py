@@ -54,7 +54,10 @@ def fi_rate(material, laser, tol=1e-3):
 	def g2(E):
 		return 1.0/(1.0+g(E)**2.0)
 	def g3(E):
-		return 2.0/c.pi*material.bandgap/(c.hbar*laser.omega)*CEI2(g2(E))/(g1(E))**0.5
+		stark_factor = 2.0/c.pi*CEI2(g2(E))/(g1(E))**0.5
+		if not material.fi_damping_correction:
+			return stark_factor*material.bandgap/(c.hbar*laser.omega)
+		return material.bandgap/(c.hbar*laser.omega)*(stark_factor - 1)*laser.omega**2/(material.damping**2+laser.omega**2) + material.bandgap/(c.hbar*laser.omega)
 
 	#infinite sum
 	def Q(E):
