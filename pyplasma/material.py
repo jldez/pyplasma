@@ -88,6 +88,8 @@ class Material(object):
 			self.xi_h = 0		
 
 		self.rho = 0
+		self.rho_fi = 0
+		self.rho_ii = 0
 		self.Ekin = 0
 		self.Ekin_h = 0
 		self.electric_current = 0
@@ -112,12 +114,14 @@ class Material(object):
 		if self.rate_equation != 'None':
 			try:
 				# Much faster to do linear interpolation even if log interpolation should be done instead.
-				self.rho_fi = np.interp(np.abs(laser.E), self.fi_table[:,0], self.fi_table[:,1])*(self.density-self.rho)/self.density
+				self.rate_fi = np.interp(np.abs(laser.E), self.fi_table[:,0], self.fi_table[:,1])*(self.density-self.rho)/self.density
 			except:
-				self.rho_fi = fi.fi_rate(self,laser)*(self.density-self.rho)/self.density
-			self.rho_ii = ii.ii_rate(self,laser,dt)
-			self.rho_re = self.recombination_rate*self.rho
-			self.rho += dt*(self.rho_fi + self.rho_ii - self.rho_re)
+				self.rate_fi = fi.fi_rate(self,laser)*(self.density-self.rho)/self.density
+			self.rate_ii = ii.ii_rate(self,laser,dt)
+			self.rate_re = self.recombination_rate*self.rho
+			self.rho_fi += dt*(self.rate_fi - self.rate_re)
+			self.rho_ii += dt*(self.rate_ii - self.rate_re)
+			self.rho = self.rho_fi + self.rho_ii
 
 	def Drude_index(self, laser):
 		self.drude_index = cmath.sqrt(self.index**2. - \

@@ -71,8 +71,11 @@ def fi_rate(material, laser, tol=1e-3):
 			err = term/sol
 		return sol*(c.pi/(2.0*CEI1(g2(E))))**0.5
 
-	return 4.0*laser.omega/(9.0*c.pi)*(material.m_red*laser.omega/(c.hbar*g1(E)**0.5))**1.5*Q(E) \
-		*np.exp(-c.pi*np.floor(g3(E)+1)*(CEI1(g1(E))-CEI2(g1(E)))/CEI2(g2(E)))
+	try:
+		return 4.0*laser.omega/(9.0*c.pi)*(material.m_red*laser.omega/(c.hbar*g1(E)**0.5))**1.5*Q(E) \
+			*np.exp(-c.pi*np.floor(g3(E)+1)*(CEI1(g1(E))-CEI2(g1(E)))/CEI2(g2(E)))
+	except:
+		return 0.0
 
 
 

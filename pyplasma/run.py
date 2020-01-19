@@ -32,8 +32,10 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 
 			output (list): A list of strings. The strings indicate what data to output.
 				-"rho": plasma density
-				-"rho_fi": field ionization rate
-				-"rho_ii": impact ionization rate
+				-"rho_fi": plasma density from field ionization
+				-"rho_ii": plasma density from impact ionization
+				-"rate_fi": field ionization rate
+				-"rate_ii": impact ionization rate
 				-"xi": If the impact ionization model is DRE, xi is the fraction
 					of the electrons E_kin > E_c.
 				-"xi_h": Same as "xi", for holes.
@@ -54,9 +56,6 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 			(dict): A dictionnary that contains all requested data. 
 				The keys correspond to the strings in the output argument.
 
-
-	To do : - rho_fi should output the total ionization from fi
-			- add fi_rate to replace current rho_fi
 	"""
 
 	out_data = {}
@@ -76,9 +75,13 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 		if "rho" in output:
 			out_data["rho"].append(Material.rho)
 		if "rho_fi" in output:
-			out_data["rho_fi"].append(dt*Material.rho_fi)
+			out_data["rho_fi"].append(dt*Material.rate_fi)
 		if "rho_ii" in output:
-			out_data["rho_ii"].append(dt*Material.rho_ii)
+			out_data["rho_ii"].append(dt*Material.rate_ii)
+		if "rate_fi" in output:
+			out_data["rate_fi"].append(Material.rate_fi)
+		if "rate_ii" in output:
+			out_data["rate_ii"].append(Material.rate_ii)
 		if "xi" in output and Material.rate_equation.lower() in ["delayed","dre"]:
 			out_data["xi"].append(Material.xi)
 		if "xi_h" in output and Material.rate_equation.lower() in ["delayed","dre"]:
@@ -159,10 +162,10 @@ def propagate(Time, Domain, output = ["rho","electric_field"], out_step=1, \
 			except:
 				pass
 		rho = Domain.get_rho()
-		rho_fi = Domain.get_rho_fi()
+		rate_fi = Domain.get_rate_fi()
 
 		# Update mpi interband currents
-		Domain.fields['Jfi'] = bandgap*rho_fi*Domain.fields['E']/(Domain.fields['E']+1.0)**2.0
+		Domain.fields['Jfi'] = bandgap*rate_fi*Domain.fields['E']/(Domain.fields['E']+1.0)**2.0
 
 		# Update bounded currents
 		w0 = 2*c.pi*c.c/resonance
@@ -209,6 +212,14 @@ def propagate(Time, Domain, output = ["rho","electric_field"], out_step=1, \
 			# Output data
 			if 'rho' in output:
 				out_data["rho"].append(rho)
+			if 'rho_fi' in output:
+				out_data["rho_fi"].append(Domain.get_rho_fi())
+			if 'rho_ii' in output:
+				out_data["rho_ii"].append(Domain.get_rho_ii())
+			if 'rate_fi' in output:
+				out_data["rate_fi"].append(rate_fi)
+			if 'rate_ii' in output:
+				out_data["rate_ii"].append(Domain.get_rate_ii())
 			if "electric_field" in output:
 				out_data["electric_field"].append(copy.copy(Domain.fields['E']))
 			if "magnetic_flux" in output:

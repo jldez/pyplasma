@@ -113,6 +113,33 @@ class Domain(object):
 				rho_fi.append(0.)
 		return np.array(rho_fi)
 
+	def get_rho_ii(self):
+		rho_ii = []
+		for i in range(len(self.x)):
+			try:
+				rho_ii.append(self.medium[i].rho_ii)
+			except:
+				rho_ii.append(0.)
+		return np.array(rho_ii)
+
+	def get_rate_fi(self):
+		rate_fi = []
+		for i in range(len(self.x)):
+			try:
+				rate_fi.append(self.medium[i].rate_fi)
+			except:
+				rate_fi.append(0.)
+		return np.array(rate_fi)
+
+	def get_rate_ii(self):
+		rate_ii = []
+		for i in range(len(self.x)):
+			try:
+				rate_ii.append(self.medium[i].rate_ii)
+			except:
+				rate_ii.append(0.)
+		return np.array(rate_ii)
+
 	def get_resonance(self):
 		resonance = []
 		for i in range(len(self.x)):

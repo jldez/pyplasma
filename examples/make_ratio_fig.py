@@ -35,7 +35,7 @@ if __name__ == '__main__':
 	for i in range(N):
 		laser.time_step(dt)
 		sio2.update_rho(laser,dt)
-		ii_contribution += dt*sio2.rho_ii
+		ii_contribution += dt*sio2.rate_ii
 		ratio_sre.append(ii_contribution/sio2.rho)
 
 	# (a) MRE
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 	for i in range(N):
 		laser.time_step(dt)
 		sio2.update_rho(laser,dt)
-		ii_contribution += dt*sio2.rho_ii
+		ii_contribution += dt*sio2.rate_ii
 		ratio_mre.append(ii_contribution/sio2.rho)
 
 	# (a) DRE
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 	for i in range(N):
 		laser.time_step(dt)
 		sio2.update_rho(laser,dt)
-		ii_contribution += dt*sio2.rho_ii
+		ii_contribution += dt*sio2.rate_ii
 		ratio_dre.append(ii_contribution/sio2.rho)
 
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 		for n in t:
 			laser.time_step(dt)
 			sio2.update_rho(laser,dt)
-			ii_contribution += dt*sio2.rho_ii
+			ii_contribution += dt*sio2.rate_ii
 		ratio_sre2.append(ii_contribution/sio2.rho)
 
 
@@ -91,7 +91,7 @@ if __name__ == '__main__':
 		for n in t:
 			laser.time_step(dt)
 			sio2.update_rho(laser,dt)
-			ii_contribution += dt*sio2.rho_ii
+			ii_contribution += dt*sio2.rate_ii
 		ratio_mre2.append(ii_contribution/sio2.rho)
 
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
 		for n in t:
 			laser.time_step(dt)
 			sio2.update_rho(laser,dt)
-			ii_contribution += dt*sio2.rho_ii
+			ii_contribution += dt*sio2.rate_ii
 		ratio_dre2.append(ii_contribution/sio2.rho)
 
 

@@ -70,7 +70,7 @@ def mre(material,laser,dt):
 	rho_hk_copy = material.rho_hk.copy()
 
 	# Electrons
-	material.rho_k[0] += dt*(material.rho_fi - ibh*rho_k_copy[0] + 2.*coll_freq_en*rho_k_copy[-1] \
+	material.rho_k[0] += dt*(material.rate_fi - ibh*rho_k_copy[0] + 2.*coll_freq_en*rho_k_copy[-1] \
 		+ coll_freq_hn*rho_hk_copy[-1] - material.recombination_rate*rho_k_copy[0])
 	for ik in range(material.k)[1:]:
 		material.rho_k[ik] += dt*(ibh*(rho_k_copy[ik-1]-rho_k_copy[ik]) \
@@ -79,7 +79,7 @@ def mre(material,laser,dt):
 		- coll_freq_en*rho_k_copy[-1] - material.recombination_rate*rho_k_copy[-1])
 
 	# Holes
-	material.rho_hk[0] += dt*(material.rho_fi - ibh_h*rho_hk_copy[0] + 2.*coll_freq_hn*rho_hk_copy[-1] \
+	material.rho_hk[0] += dt*(material.rate_fi - ibh_h*rho_hk_copy[0] + 2.*coll_freq_hn*rho_hk_copy[-1] \
 		+ coll_freq_en*rho_k_copy[-1] - material.recombination_rate*rho_hk_copy[0])
 	for ik in range(material.k)[1:]:
 		material.rho_hk[ik] += dt*(ibh_h*(rho_hk_copy[ik-1]-rho_hk_copy[ik]) \
@@ -105,9 +105,9 @@ def dre(material,laser,dt):
 
 	temp, temp2 = material.Ekin, material.Ekin_h
 	material.Ekin += dt*(ibh*c.hbar*laser.omega - coll_freq_en*xi_e*Ec - \
-		material.Ekin*(material.rho_fi/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
+		material.Ekin*(material.rate_fi/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
 	material.Ekin_h += dt*(ibh_h*c.hbar*laser.omega - coll_freq_hn*xi_h*Ec - \
-		material.Ekin_h*(material.rho_fi/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
+		material.Ekin_h*(material.rate_fi/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
 
 	return material.rho*(coll_freq_en*xi_e + coll_freq_hn*xi_h)
 
