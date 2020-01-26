@@ -114,7 +114,7 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 
 
 def propagate(Time, Domain, output = ["rho","electric_field"], out_step=1, \
-			  remove_pml=True, accelerate_fi=False, source_mode='TFSF', progress_bar=True):
+			  remove_pml=True, accelerate_fi=True, source_mode='TFSF', progress_bar=True):
 
 	# TFSF implementation might not be perfect. See references:
 	# Section 3.0 of : https://studylib.net/doc/8392930/6.-total-field---scattered-field-fdtd-implementation-in-m...
