@@ -9,9 +9,9 @@ except ImportError:
 
 setup(name="pyplasma",
 
-      version = '0.1',
+      version = '0.2',
       description='Python module for plasma formation modelling.',
-      author='TODO',
+      author='Jean-Luc Déziel',
       author_email='jean-luc.deziel.1@ulaval.ca',
       packages=['pyplasma'],
 

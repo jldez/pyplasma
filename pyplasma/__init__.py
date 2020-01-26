@@ -1,3 +1,5 @@
+__version__ = '0.2'
+
 from . import material
 from . import laser
 from . import run as r
