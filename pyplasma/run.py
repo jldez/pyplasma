@@ -216,6 +216,8 @@ def propagate(Time, Domain, output = ["rho","electric_field"], out_step=1, \
 				out_data["rho_fi"].append(Domain.get_rho_fi())
 			if 'rho_ii' in output:
 				out_data["rho_ii"].append(Domain.get_rho_ii())
+			if 'rho_k' in output:
+				out_data["rho_k"].append(Domain.get_rho_k())
 			if 'rate_fi' in output:
 				out_data["rate_fi"].append(rate_fi)
 			if 'rate_ii' in output:
@@ -236,6 +238,8 @@ def propagate(Time, Domain, output = ["rho","electric_field"], out_step=1, \
 				out_data["ibh"].append(copy.copy(Domain.get_ibh(Domain.fields['E'])))
 			if 'kinetic_energy' in output:
 				out_data['kinetic_energy'].append(copy.copy(Domain.get_kinetic_energy()))
+			if 'critical_energy' in output:
+				out_data['critical_energy'].append(copy.copy(Domain.get_critical_energy()))
 
 		n+=1
 

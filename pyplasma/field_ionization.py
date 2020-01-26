@@ -68,7 +68,7 @@ def fi_rate(material, laser, tol=1e-3):
 			term = np.exp(-n*c.pi*c1)*DI(c.pi*((np.floor(g3(E)+1.0)-g3(E)+n)/c2)**0.5)
 			sol = sol + term
 			n = n+1
-			err = term/sol
+			err = term/(sol+1e-16)
 		return sol*(c.pi/(2.0*CEI1(g2(E))))**0.5
 
 	try:

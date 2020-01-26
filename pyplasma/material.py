@@ -93,6 +93,7 @@ class Material(object):
 		self.Ekin = 0
 		self.Ekin_h = 0
 		self.electric_current = 0
+		self.critical_energy = 0
 
 
 	def __copy__(self):

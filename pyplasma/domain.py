@@ -24,6 +24,8 @@ class Domain(object):
 		self.Laser = Laser
 		self.materials = materials
 		self.pml_width = pml_width
+		self.rho_ik_avalable = True # until proven wrong
+		self.k_mre = 0
 
 		self.construct_domain()
 
@@ -122,6 +124,25 @@ class Domain(object):
 				rho_ii.append(0.)
 		return np.array(rho_ii)
 
+	def get_rho_k(self):
+		if self.rho_ik_avalable and self.k_mre == 0:
+			for i in range(len(self.x)):
+				try: self.k_mre = self.medium[i].k
+				except: pass
+			if self.k_mre == 0:
+				self.rho_ik_avalable = False
+
+		if self.rho_ik_avalable and self.k_mre > 0:
+			rho_k = np.zeros((len(self.x), self.k_mre))
+			for i in range(len(self.x)):
+				for ik in range(self.k_mre):
+					try:
+						rho_k[i,ik] = self.medium[i].rho_k[ik]
+					except: pass
+			return rho_k
+		else:
+			return np.zeros(len(self.x))
+
 	def get_rate_fi(self):
 		rate_fi = []
 		for i in range(len(self.x)):
@@ -214,6 +235,16 @@ class Domain(object):
 			except:
 				kinetic_energy.append(0.)
 		return np.array(kinetic_energy)
+
+	def get_critical_energy(self):
+		critical_energy = []
+		for i in range(len(self.x)):
+			try:
+				critical_energy.append(self.medium[i].critical_energy)
+			except:
+				critical_energy.append(0.)
+		return np.array(critical_energy)
+	
 
 
 
