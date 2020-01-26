@@ -75,9 +75,9 @@ def run(Time, Material, Laser, output = ["rho","electric_field"], progress_bar=T
 		if "rho" in output:
 			out_data["rho"].append(Material.rho)
 		if "rho_fi" in output:
-			out_data["rho_fi"].append(dt*Material.rate_fi)
+			out_data["rho_fi"].append(Material.rho_fi)
 		if "rho_ii" in output:
-			out_data["rho_ii"].append(dt*Material.rate_ii)
+			out_data["rho_ii"].append(Material.rho_ii)
 		if "rate_fi" in output:
 			out_data["rate_fi"].append(Material.rate_fi)
 		if "rate_ii" in output:

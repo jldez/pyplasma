@@ -120,8 +120,8 @@ class Material(object):
 				self.rate_fi = fi.fi_rate(self,laser)*(self.density-self.rho)/self.density
 			self.rate_ii = ii.ii_rate(self,laser,dt)
 			self.rate_re = self.recombination_rate*self.rho
-			self.rho_fi += dt*(self.rate_fi - self.rate_re)
-			self.rho_ii += dt*(self.rate_ii - self.rate_re)
+			self.rho_fi += dt*(self.rate_fi - self.recombination_rate*self.rho_fi)
+			self.rho_ii += dt*(self.rate_ii - self.recombination_rate*self.rho_ii)
 			self.rho = self.rho_fi + self.rho_ii
 
 	def Drude_index(self, laser):
