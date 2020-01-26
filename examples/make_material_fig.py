@@ -16,7 +16,6 @@ import os
 import pyplasma as pp
 
 
-
 def Threshold(material,laser):
 	return c.epsilon_0*material.m_red/c.e**2.*material.index**2.*(laser.omega**2.+material.damping**2.)
 
@@ -54,7 +53,7 @@ if __name__ == '__main__':
 						 ,"density":3.19e28,"cross_section":1.08e-19,"damping":0.5e15,"gr":0}
 
 
-	taus = np.logspace(np.log10(20),np.log10(1200),15)*1e-15
+	taus = np.logspace(np.log10(20),np.log10(1200),20)*1e-15
 	
 
 	for m in materials:
@@ -128,5 +127,4 @@ if __name__ == '__main__':
 	plt.tight_layout()
 	plt.savefig("materials.pdf")
 	os.system("pdfcrop materials.pdf materials.pdf > /dev/null")
-
 	# plt.show()

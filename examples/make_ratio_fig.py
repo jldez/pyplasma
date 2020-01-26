@@ -31,36 +31,42 @@ if __name__ == '__main__':
 		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
 	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_sre)
 
-	ii_contribution, ratio_sre = 0, []
+	fluence_sre = []
+	ratio_sre = []
 	for i in range(N):
 		laser.time_step(dt)
 		sio2.update_rho(laser,dt)
-		ii_contribution += dt*sio2.rate_ii
-		ratio_sre.append(ii_contribution/sio2.rho)
+		ratio_sre.append(sio2.rho_ii/sio2.rho)
+		fluence_sre.append(laser.E)
+	fluence_sre = dt*c.c*c.epsilon_0*np.sum(np.array(fluence_sre)**2.)
 
 	# (a) MRE
 	sio2 = pp.Material(rate_equation="mre", index=1.5, bandgap=9.*c.e, \
 		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
 	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_mre)
 
-	ii_contribution, ratio_mre = 0, []
+	fluence_mre = []
+	ratio_mre = []
 	for i in range(N):
 		laser.time_step(dt)
 		sio2.update_rho(laser,dt)
-		ii_contribution += dt*sio2.rate_ii
-		ratio_mre.append(ii_contribution/sio2.rho)
+		ratio_mre.append(sio2.rho_ii/sio2.rho)
+		fluence_mre.append(laser.E)
+	fluence_mre = dt*c.c*c.epsilon_0*np.sum(np.array(fluence_mre)**2.)
 
 	# (a) DRE
 	sio2 = pp.Material(rate_equation="dre", index=1.5, bandgap=9.*c.e, \
 		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
 	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_dre)
 
-	ii_contribution, ratio_dre = 0, []
+	fluence_dre = []
+	ratio_dre = []
 	for i in range(N):
 		laser.time_step(dt)
 		sio2.update_rho(laser,dt)
-		ii_contribution += dt*sio2.rate_ii
-		ratio_dre.append(ii_contribution/sio2.rho)
+		ratio_dre.append(sio2.rho_ii/sio2.rho)
+		fluence_dre.append(laser.E)
+	fluence_dre = dt*c.c*c.epsilon_0*np.sum(np.array(fluence_dre)**2.)
 
 
 
@@ -73,12 +79,10 @@ if __name__ == '__main__':
 		sio2 = pp.Material(rate_equation="sre", index=1.5, bandgap=9.*c.e, alpha_sre=0.0004, \
 			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
 		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_sre*factorF[i]**2.)
-		ii_contribution = 0
 		for n in t:
 			laser.time_step(dt)
 			sio2.update_rho(laser,dt)
-			ii_contribution += dt*sio2.rate_ii
-		ratio_sre2.append(ii_contribution/sio2.rho)
+		ratio_sre2.append(sio2.rho_ii/sio2.rho)
 
 
 	# (b) MRE
@@ -87,26 +91,22 @@ if __name__ == '__main__':
 		sio2 = pp.Material(rate_equation="mre", index=1.5, bandgap=9.*c.e, \
 			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
 		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_mre*factorF[i]**2.)
-		ii_contribution = 0
 		for n in t:
 			laser.time_step(dt)
 			sio2.update_rho(laser,dt)
-			ii_contribution += dt*sio2.rate_ii
-		ratio_mre2.append(ii_contribution/sio2.rho)
+		ratio_mre2.append(sio2.rho_ii/sio2.rho)
 
 
-	# (b) MRE
+	# (b) DRE
 	ratio_dre2 = []
 	for i in range(NF):
 		sio2 = pp.Material(rate_equation="dre", index=1.5, bandgap=9.*c.e, \
 			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
 		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_dre*factorF[i]**2.)
-		ii_contribution = 0
 		for n in t:
 			laser.time_step(dt)
 			sio2.update_rho(laser,dt)
-			ii_contribution += dt*sio2.rate_ii
-		ratio_dre2.append(ii_contribution/sio2.rho)
+		ratio_dre2.append(sio2.rho_ii/sio2.rho)
 
 
 

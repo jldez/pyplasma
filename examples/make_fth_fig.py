@@ -16,7 +16,6 @@ import os
 import pyplasma as pp
 
 
-
 def Threshold(material,laser):
 	return c.epsilon_0*material.m_red/c.e**2.*material.index**2.*(laser.omega**2.+material.damping**2.)
 
