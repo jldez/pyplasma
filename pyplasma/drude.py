@@ -11,7 +11,7 @@ import scipy.constants as c
 
 def Ep(material, laser):
 	""" Cycle-averaged ponderomotive energy """
-	Ep = c.e**2.0*laser.E**2.0/(4.0*material.m_red*(material.damping**2.0+laser.omega**2.0))
+	Ep = c.e**2.0*laser.E**2.0/(4.0*material.m_red*c.m_e*(material.damping**2.0+laser.omega**2.0))
 	return Ep
 
 
@@ -35,11 +35,11 @@ def ibh(material, laser, s="eh"):
 	"""
 	ibh = c.e**2*material.damping*laser.E**2./(2.*c.hbar*laser.omega*(material.damping**2.+laser.omega**2.))
 	if s == "eh":
-		return ibh/material.m_red
+		return ibh/material.m_red/c.m_e
 	if s == "e":
-		return ibh/material.m_CB
+		return ibh/material.m_CB/c.m_e
 	if s == "h":
-		return ibh/material.m_VB
+		return ibh/material.m_VB/c.m_e
 
 
 

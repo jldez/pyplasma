@@ -17,7 +17,7 @@ import pyplasma as pp
 
 
 def Threshold(material,laser):
-	return c.epsilon_0*material.m_red/c.e**2.*material.index**2.*(laser.omega**2.+material.damping**2.)
+	return c.epsilon_0*material.m_red*c.m_e/c.e**2.*material.index**2.*(laser.omega**2.+material.damping**2.)
 
 
 def above_threshold(tt,material,laser):

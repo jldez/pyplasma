@@ -7,6 +7,10 @@ from . import misc
 from . import field_ionization
 from . import impact_ionization
 from . import domain
+from . import domain3d
+
+from .backend import backend
+from .backend import set_backend
 
 Material = material.Material
 Laser = laser.Laser
@@ -16,4 +20,5 @@ fi_rate = field_ionization.fi_rate
 ii_rate = impact_ionization.ii_rate
 
 Domain = domain.Domain
+Domain3d = domain3d.Domain3d
 propagate = r.propagate

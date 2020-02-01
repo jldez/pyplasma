@@ -12,15 +12,15 @@ from . import drude as dru
 
 def g_en(material):
 	""" electron-molecule collision rate """
-	return material.cross_section*(material.density-material.rho)*(2.0*abs(material.Ekin)/material.m_CB)**0.5
+	return material.cross_section*(material.density-material.rho)*(2.0*abs(material.Ekin)/material.m_CB/c.m_e)**0.5
 
 def g_hn(material):
 	""" hole-molecule collision rate """
-	return material.cross_section*(material.density-material.rho)*(2.0*abs(material.Ekin_h)/material.m_VB)**0.5
+	return material.cross_section*(material.density-material.rho)*(2.0*abs(material.Ekin_h)/material.m_VB/c.m_e)**0.5
 
 def g_ee(material):
 	""" electron-electron collision rate """
-	return 4.*c.pi*c.epsilon_0/c.e**2.*(6./material.m_CB)**.5*(2.*material.Ekin/3.)**1.5
+	return 4.*c.pi*c.epsilon_0/c.e**2.*(6./material.m_CB/c.m_e)**.5*(2.*material.Ekin/3.)**1.5
 
 
 def Ekin_max(material,laser,E,s="eh"):
@@ -49,8 +49,9 @@ def Ekin_max(material,laser,E,s="eh"):
 		m = material.m_CB
 	elif s == "h":
 		m = material.m_VB
+	m *= c.m_e
 
-	Ep = c.e**2.0*laser.E**2.0/(4.0*material.m_red*(material.damping**2.0+laser.omega**2.0))
+	Ep = c.e**2.0*laser.E**2.0/(4.0*material.m_red*c.m_e*(material.damping**2.0+laser.omega**2.0))
 	Ec = (1.0+material.m_red/material.m_VB)*(material.bandgap+Ep)
 
 	laser.E = E.max()

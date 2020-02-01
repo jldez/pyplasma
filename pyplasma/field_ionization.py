@@ -32,9 +32,6 @@ def fi_rate(material, laser, tol=1e-3):
 	if (E<1e3) or material.rate_equation == 'None':
 		return 0.0
 
-	# if fi_table != None and laser.E <= fi_table[0,-1]:
-	# 	return interp(E, fi_table[0,:], fi_table[1,:])
-
 	def CEI1(a):
 		return ellipk(a)
 	def CEI2(a):
@@ -46,7 +43,7 @@ def fi_rate(material, laser, tol=1e-3):
 
 	#Keldysh parameter
 	def g(E):
-		return laser.omega*(material.m_red*material.bandgap)**0.5/(c.e*E)
+		return laser.omega*(material.m_red*c.m_e*material.bandgap)**0.5/(c.e*E)
 
 	#dummy parameters
 	def g1(E):
@@ -72,7 +69,7 @@ def fi_rate(material, laser, tol=1e-3):
 		return sol*(c.pi/(2.0*CEI1(g2(E))))**0.5
 
 	try:
-		return 4.0*laser.omega/(9.0*c.pi)*(material.m_red*laser.omega/(c.hbar*g1(E)**0.5))**1.5*Q(E) \
+		return 4.0*laser.omega/(9.0*c.pi)*(material.m_red*c.m_e*laser.omega/(c.hbar*g1(E)**0.5))**1.5*Q(E) \
 			*np.exp(-c.pi*np.floor(g3(E)+1)*(CEI1(g1(E))-CEI2(g1(E)))/CEI2(g2(E)))
 	except:
 		return 0.0
@@ -80,9 +77,9 @@ def fi_rate(material, laser, tol=1e-3):
 
 
 
-def fi_table(material, laser, N=1e3, tol=1e-3, output=None, progress_bar=True):
+def fi_table(material, laser, N=1000, tol=1e-3, output=None, progress_bar=True):
 
-	Es = np.logspace(3,np.log10(5*laser.E0),N)
+	Es = np.logspace(3,np.log10(5*laser.E0),int(N))
 	table = []
 
 	if progress_bar:

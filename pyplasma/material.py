@@ -6,7 +6,6 @@
 from __future__ import print_function,division
 import numpy as np
 import scipy.constants as c
-from scipy.interpolate import *
 import cmath
 
 from . import drude
@@ -64,8 +63,8 @@ class Material(object):
 		self.chi3 = chi3
 		self.resonance = resonance
 		self.bandgap = bandgap
-		self.m_CB = m_CB*c.m_e
-		self.m_VB = m_VB*c.m_e
+		self.m_CB = m_CB
+		self.m_VB = m_VB
 		if m_CB !=0 and m_VB !=0 :
 			self.m_red = (self.m_CB**-1.+self.m_VB**-1.)**-1.
 		else: 
@@ -98,21 +97,21 @@ class Material(object):
 
 	def __copy__(self):
 		return Material(name=self.name, rate_equation=self.rate_equation, \
-						index=self.index, bandgap=self.bandgap, m_CB=self.m_CB/c.m_e, \
-						m_VB=self.m_VB/c.m_e, density=self.density, \
+						index=self.index, bandgap=self.bandgap, m_CB=self.m_CB, \
+						m_VB=self.m_VB, density=self.density, \
 						cross_section=self.cross_section, damping=self.damping, \
 						recombination_rate=self.recombination_rate, alpha_sre=self.alpha_sre)
 
 
 	def plasma_freq(self):
-		return abs(c.e**2*self.rho/(c.epsilon_0*self.m_red))**.5
+		return abs(c.e**2*self.rho/(c.epsilon_0*self.m_red*c.m_e))**.5
 
 	def update_electric_current(self, laser, dt):
 		self.electric_current = self.electric_current*(1.0-dt*self.damping) \
 							  + dt*c.epsilon_0*self.plasma_freq()*laser.E
 
 	def update_rho(self, laser, dt):
-		if self.rate_equation != 'None':
+		if self.rate_equation.lower() != 'none':
 			try:
 				# Much faster to do linear interpolation even if log interpolation should be done instead.
 				self.rate_fi = np.interp(np.abs(laser.E), self.fi_table[:,0], self.fi_table[:,1])*(self.density-self.rho)/self.density

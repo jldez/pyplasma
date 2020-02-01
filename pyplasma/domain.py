@@ -10,12 +10,15 @@ import copy
 
 from . import laser as las
 from . import drude as dru
+from . import run as run
 
 
 class Domain(object):
 
 	def __init__(self, length, Nx, x0=0, Laser=None, \
 				 materials=[{'x_min':0,'x_max':-1,'material':None}], pml_width=0):
+
+		# TODO : x0 is confusing. Remove?
 
 		super(Domain, self).__init__()
 		self.length = length
@@ -32,6 +35,11 @@ class Domain(object):
 		self.fields = {}
 		for field in ['E','H','P','Jb','Jf','Jfi']:
 			self.fields[field] = np.zeros(len(self.x))
+
+	
+	def propagate(self, time, output = ["rho","electric_field"], out_step=1, \
+			      remove_pml=True, accelerate_fi=True, source_mode='TFSF', progress_bar=True):
+		return run.propagate(time, self, output, out_step, remove_pml, accelerate_fi, source_mode, progress_bar)
 
 
 	def construct_domain(self):
@@ -96,116 +104,110 @@ class Domain(object):
 			for field in self.fields:
 				self.fields[field] = self.fields[field][self.nb_pml:-self.nb_pml]
 
+	def __len__(self):
+		return len(self.x)
 
-	def get_rho(self):
-		rho = []
-		for i in range(len(self.x)):
-			try:
-				rho.append(self.medium[i].rho)
-			except:
-				rho.append(0.)
-		return np.array(rho)
+	@property
+	def rho(self):
+		rho = np.zeros(len(self))
+		for i in range(len(self)):
+			try: rho[i] = self.medium[i].rho
+			except: pass
+		return rho
 
-	def get_rho_fi(self):
-		rho_fi = []
-		for i in range(len(self.x)):
-			try:
-				rho_fi.append(self.medium[i].rho_fi)
-			except:
-				rho_fi.append(0.)
-		return np.array(rho_fi)
+	@property
+	def rho_fi(self):
+		rho_fi = np.zeros(len(self))
+		for i in range(len(self)):
+			try: rho_fi[i] = self.medium[i].rho_fi
+			except: pass
+		return rho_fi
 
-	def get_rho_ii(self):
-		rho_ii = []
-		for i in range(len(self.x)):
-			try:
-				rho_ii.append(self.medium[i].rho_ii)
-			except:
-				rho_ii.append(0.)
-		return np.array(rho_ii)
+	@property
+	def rho_ii(self):
+		rho_ii = np.zeros(len(self))
+		for i in range(len(self)):
+			try: rho_ii[i] = self.medium[i].rho_ii
+			except: pass
+		return rho_ii
 
-	def get_rho_k(self):
+	@property
+	def rho_k(self):
 		if self.rho_ik_avalable and self.k_mre == 0:
-			for i in range(len(self.x)):
+			for i in range(len(self)):
 				try: self.k_mre = self.medium[i].k
 				except: pass
 			if self.k_mre == 0:
 				self.rho_ik_avalable = False
 
 		if self.rho_ik_avalable and self.k_mre > 0:
-			rho_k = np.zeros((len(self.x), self.k_mre))
-			for i in range(len(self.x)):
+			rho_k = np.zeros((len(self), self.k_mre))
+			for i in range(len(self)):
 				for ik in range(self.k_mre):
 					try:
 						rho_k[i,ik] = self.medium[i].rho_k[ik]
 					except: pass
 			return rho_k
 		else:
-			return np.zeros(len(self.x))
+			return np.zeros(len(self))
 
-	def get_rate_fi(self):
-		rate_fi = []
-		for i in range(len(self.x)):
-			try:
-				rate_fi.append(self.medium[i].rate_fi)
-			except:
-				rate_fi.append(0.)
-		return np.array(rate_fi)
+	@property
+	def rate_fi(self):
+		rate_fi = np.zeros(len(self))
+		for i in range(len(self)):
+			try: rate_fi[i] = self.medium[i].rate_fi
+			except: pass
+		return rate_fi
 
-	def get_rate_ii(self):
-		rate_ii = []
-		for i in range(len(self.x)):
-			try:
-				rate_ii.append(self.medium[i].rate_ii)
-			except:
-				rate_ii.append(0.)
-		return np.array(rate_ii)
+	@property
+	def rate_ii(self):
+		rate_ii = np.zeros(len(self))
+		for i in range(len(self)):
+			try: rate_ii[i] = self.medium[i].rate_ii
+			except: pass
+		return rate_ii
 
-	def get_resonance(self):
-		resonance = []
-		for i in range(len(self.x)):
-			try:
-				resonance.append(self.medium[i].resonance)
-			except:
-				resonance.append(np.inf)
-		return np.array(resonance)
+	@property
+	def resonance(self):
+		resonance = np.full(len(self), np.inf)
+		for i in range(len(self)):
+			try: resonance[i] = self.medium[i].resonance
+			except: pass
+		return resonance
 
-	def get_chis(self):
-		chis = []
-		for i in range(len(self.x)):
+	@property
+	def chis(self):
+		chis = np.zeros((len(self),3))
+		for i in range(len(self)):
 			try:
 				chi1 = self.medium[i].index**2 -1.
-				chis.append([chi1,self.medium[i].chi2,self.medium[i].chi3])
-			except:
-				chis.append([0.,0.,0.])
-		return np.array(chis)
+				chis[i,:] = [chi1,self.medium[i].chi2,self.medium[i].chi3]
+			except: pass
+		return chis
 
-	def get_damping(self):
-		damping = []
-		for i in range(len(self.x)):
-			try:
-				damping.append(self.medium[i].damping)
-			except:
-				damping.append(0.)
-		return np.array(damping)
+	@property
+	def damping(self):
+		damping = np.zeros(len(self))
+		for i in range(len(self)):
+			try: damping[i] = self.medium[i].damping
+			except: pass
+		return damping
 
-	def get_m_red(self):
-		m_red = []
-		for i in range(len(self.x)):
-			try:
-				m_red.append(self.medium[i].m_red)
-			except:
-				m_red.append(1.)
-		return np.array(m_red)
+	@property
+	def m_red(self):
+		m_red = np.ones(len(self))
+		for i in range(len(self)):
+			try: m_red[i] = self.medium[i].m_red
+			except: pass
+		return m_red
 
-	def get_bandgap(self):
-		bandgap = []
-		for i in range(len(self.x)):
-			try:
-				bandgap.append(self.medium[i].bandgap)
-			except:
-				bandgap.append(0.)
-		return np.array(bandgap)
+	@property
+	def bandgap(self):
+		bandgap = np.zeros(len(self))
+		for i in range(len(self)):
+			try: bandgap[i] = self.medium[i].bandgap
+			except: pass
+		return bandgap
 
 	def get_ponderomotive_energy(self, E):
 		ponderomotive_energy = []
@@ -227,24 +229,21 @@ class Domain(object):
 				ibh.append(0.)
 		return np.array(ibh)
 
-	def get_kinetic_energy(self):
-		kinetic_energy = []
-		for i in range(len(self.x)):
+	@property
+	def kinetic_energy(self):
+		kinetic_energy = np.zeros(len(self))
+		for i in range(len(self)):
 			try:
-				kinetic_energy.append(self.medium[i].Ekin)
-			except:
-				kinetic_energy.append(0.)
-		return np.array(kinetic_energy)
+				kinetic_energy[i] = self.medium[i].Ekin
+			except: pass
+		return kinetic_energy
 
-	def get_critical_energy(self):
-		critical_energy = []
-		for i in range(len(self.x)):
+	@property
+	def critical_energy(self):
+		critical_energy = np.zeros(len(self))
+		for i in range(len(self)):
 			try:
-				critical_energy.append(self.medium[i].critical_energy)
-			except:
-				critical_energy.append(0.)
-		return np.array(critical_energy)
-	
-
-
+				critical_energy[i] = self.medium[i].critical_energy
+			except: pass
+		return critical_energy
 

@@ -51,7 +51,7 @@ def mre(material,laser,dt):
 	""" Multiple rate equation model """
 
 	if len(material.rho_k) == 0:
-		Ep = c.e**2.0*laser.E0**2.0/(4.0*material.m_red*(material.damping**2.0+laser.omega**2.0))
+		Ep = c.e**2.0*laser.E0**2.0/(4.0*material.m_red*c.m_e*(material.damping**2.0+laser.omega**2.0))
 		Ec = (1.0+material.m_red/material.m_VB)*(material.bandgap+Ep)
 		material.critical_energy = Ec
 		material.k = int(np.ceil(Ec/(c.hbar*laser.omega)))
@@ -98,7 +98,7 @@ def dre(material,laser,dt):
 	ibh_h = dru.ibh(material,laser,s="h")
 	coll_freq_en = mis.g_en(material)
 	coll_freq_hn = mis.g_hn(material)
-	Ep = c.e**2.0*laser.E**2.0/(4.0*material.m_red*(material.damping**2.0+laser.omega**2.0))
+	Ep = c.e**2.0*laser.E**2.0/(4.0*material.m_red*c.m_e*(material.damping**2.0+laser.omega**2.0))
 	Ec = (1.0+material.m_red/material.m_VB)*(material.bandgap+Ep)
 	material.critical_energy = Ec
 	re, rh = r(Ec,material.Ekin), r(Ec,material.Ekin_h)
