@@ -1,27 +1,18 @@
 __version__ = '0.2'
 
-from . import material
-from . import laser
-from . import run as r
-from . import misc
-from . import field_ionization
-from . import impact_ionization
-from . import domain
-from . import domain3d
-from . import observers
-
 from .backend import backend
 from .backend import set_backend
 
-Material = material.Material
-Laser = laser.Laser
-run = r.run
-# Ekin_max = misc.Ekin_max
-fi_rate = field_ionization.fi_rate
-ii_rate = impact_ionization.ii_rate
+from .simulation import Domain, Time
+from .laser import Laser
+from .material import Material
+from .observers import Observer
 
-Domain = domain.Domain
-Domain3d = domain3d.Domain3d
-propagate = r.propagate
+ns = 1e-9
+ps = 1e-12
+fs = 1e-15
 
-Observer = observers.Observer
+um = 1e-6
+nm = 1e-9
+pm = 1e-12
+
