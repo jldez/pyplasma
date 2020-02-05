@@ -95,6 +95,10 @@ def mre(E, material, laser, dt, tracks=[]):
 	material.rho_hk[-1] += dt*(hl_heating_rate*rho_hk_copy[-2] \
 		- coll_freq_hn*rho_hk_copy[-1] - material.recombination_rate*rho_hk_copy[-1])
 
+	for track in tracks:
+		track_array = eval(track)
+		setattr(material, track, track_array)
+
 	return material.mask*(coll_freq_en*material.rho_k[material.k] + coll_freq_hn*material.rho_hk[material.k])
 
 
