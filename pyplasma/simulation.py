@@ -60,7 +60,7 @@ class Domain():
         self.dt = time.dt
 
         if progress_bar:
-            time.t = tqdm.tqdm(time.t, 'Running')
+            self.times = tqdm.tqdm(time.t, 'Running')
 
         self.set_boundaries(time.dt)
 
@@ -68,7 +68,7 @@ class Domain():
             if material.rate_equation != 'none':
                 material.make_fi_table(self.laser)
 
-        for self.it, self.t in enumerate(time.t):
+        for self.it, self.t in enumerate(self.times):
 
             if self.D == 0:
                 self.update_plasma()
@@ -111,7 +111,7 @@ class Domain():
     def update_bounded_current(self):
         # TODO: Add reference to Varin's model
         for material in self.materials:
-            w0 = 2*c.pi*c.c/(material.resonance+1e-16)
+            w0 = 2*c.pi*c.c/(material.resonance+1e-16) if material.resonance > 0 else 0
             P = c.epsilon_0*((material.index**2 - 1)*self.fields['E'] + 
                               material.chi2*self.fields['E']**2 + 
                               material.chi3*self.fields['E']**3)
@@ -187,7 +187,7 @@ class Domain():
         out_dico = {}
         for observer in self.observers:
             if observer.mode == 'return':
-                out_dico[observer.target] = np.stack(observer.stack_data)
+                out_dico[observer.target] = np.squeeze(np.stack(observer.stack_data))
         return out_dico
 
 

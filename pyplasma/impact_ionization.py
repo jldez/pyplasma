@@ -105,9 +105,8 @@ def mre(E, material, laser, dt, tracks=[]):
 def dre(E, material, laser, dt, tracks=[]):
 	""" Delayed rate equation model """
 
-	A = material.mask*c.e**2*material.damping*E**2/(2*c.hbar*laser.omega*(material.damping**2+laser.omega**2))
-	el_heating_rate = A/(material.m_CB*c.m_e)
-	hl_heating_rate = A/(material.m_VB*c.m_e)
+	el_heating_rate = get_el_heating_rate(E, material, laser)
+	hl_heating_rate = get_hl_heating_rate(E, material, laser)
 
 	B = material.mask*material.cross_section*(material.density-material.rho)
 	coll_freq_en = B*(2*material.Ekin/material.m_CB/c.m_e)**0.5
