@@ -140,7 +140,7 @@ class Observer():
             rate = 'fi_rate' if self.target == 'rho_fi' else 'ii_rate'
             data = self.cache
             for material in self.domain.materials:
-                data += getattr(material, rate)*self.domain.dt
+                data += getattr(material, rate)*self.domain.dt*self.out_step
             self.cache = copy.deepcopy(data)
 
         if self.target == 'ponderomotive_energy':
