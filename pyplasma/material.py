@@ -48,7 +48,7 @@ class Material():
 			rate_equation (str): The rate equation model to use when calculating plasma 
 				formation rate. Choose "single" or "sre" to use single rate equation. Choose 
 				"multiple" or "mre" for multiple rate equations. Choose "delayed" or "dre" for 
-				the delayed rate equations. Default is "none" which means field ionization only.
+				the delayed rate equations. Choose 'fi' for field ionization only. Default is "none".
 
 			bandgap (float): The bandgap between the conduction and the valence bands in Joules.
 
@@ -110,6 +110,9 @@ class Material():
 			self.fi_damping_correction = False
 			if 'fi_damping_correction' in ionization_params:
 				self.fi_damping_correction = ionization_params['fi_damping_correction']
+
+			if ionization_params['rate_equation'].lower() in ['fi']:
+				self.rate_equation = 'fi'
 
 			if ionization_params['rate_equation'].lower() in ['sre','single']:
 				self.rate_equation = 'sre'
