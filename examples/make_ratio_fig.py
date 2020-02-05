@@ -1,168 +1,127 @@
-#! /usr/bin/python
-# -*- coding: utf-8 -*-
 """
 
 """
-from __future__ import print_function,division
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 plt.rcParams['ps.useafm'] = True
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams.update({'font.size': 14})
-import matplotlib.patches as patches
-import scipy.constants as c
 import os
 
-import pyplasma as pp
+from pyplasma import *
+import scipy.constants as c
 
 
 
 if __name__ == '__main__':
 
-	E0_sre, E0_mre, E0_dre = 3.98e9, 4.16e9, 3.66e9
+    ### (a) ###############################################################################
 
-	t_max, N = 100e-15, 1000
-	dt = t_max/N
-	t = np.linspace(0,t_max*1e15,N)
-
-	# (a) SRE
-	sio2 = pp.Material(rate_equation="sre", index=1.5, bandgap=9.*c.e, alpha_sre=0.0004, \
-		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_sre)
-
-	fluence_sre = []
-	ratio_sre = []
-	for i in range(N):
-		laser.time_step(dt)
-		sio2.update_rho(laser,dt)
-		ratio_sre.append(sio2.rho_ii/sio2.rho)
-		fluence_sre.append(laser.E)
-	fluence_sre = dt*c.c*c.epsilon_0*np.sum(np.array(fluence_sre)**2.)
-
-	# (a) MRE
-	sio2 = pp.Material(rate_equation="mre", index=1.5, bandgap=9.*c.e, \
-		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_mre)
-
-	fluence_mre = []
-	ratio_mre = []
-	for i in range(N):
-		laser.time_step(dt)
-		sio2.update_rho(laser,dt)
-		ratio_mre.append(sio2.rho_ii/sio2.rho)
-		fluence_mre.append(laser.E)
-	fluence_mre = dt*c.c*c.epsilon_0*np.sum(np.array(fluence_mre)**2.)
-
-	# (a) DRE
-	sio2 = pp.Material(rate_equation="dre", index=1.5, bandgap=9.*c.e, \
-		damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-	laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_dre)
-
-	fluence_dre = []
-	ratio_dre = []
-	for i in range(N):
-		laser.time_step(dt)
-		sio2.update_rho(laser,dt)
-		ratio_dre.append(sio2.rho_ii/sio2.rho)
-		fluence_dre.append(laser.E)
-	fluence_dre = dt*c.c*c.epsilon_0*np.sum(np.array(fluence_dre)**2.)
+    # Ajust each E0 to obtain a ratio of 0.5
+    params_sre = {'rate_equation':'sre', 'E0':3.98e9}
+    params_mre = {'rate_equation':'mre', 'E0':4.16e9}
+    params_dre = {'rate_equation':'dre', 'E0':3.66e9}
+    
+    time = Time(0, 100*fs, 1000)
+    ratios = {'time':time.t/fs}
+    for params in [params_sre, params_mre, params_dre]:
+        mat = Material(index=1.5, drude_params={'damping':1e15}, 
+                       ionization_params={'rate_equation':params['rate_equation'],
+                                          'bandgap':9*eV,'alpha_sre':0.0004,
+                                          'density':2e28,'cross_section':1e-19})
+        las = Laser(wavelength=800*nm, phase=False, E0=params['E0'])
+        dom = Domain()
+        dom.add_laser(las, remove_reflected_part=False)
+        dom.add_material(mat)
+        dom.add_observer(Observer('rho','return'))
+        dom.add_observer(Observer('rho_ii','return'))
+        dom.add_observer(Observer('E','return'))
+        results = dom.run(time, progress_bar=False)
+        ratio = results['rho_ii']/results['rho']
+        ratios[params['rate_equation']] = ratio
+        fluence = time.dt*c.c*c.epsilon_0*np.sum(np.array(results['E'])**2.)
+        print(params['rate_equation'] + f': ratio: {ratio.max()}, fluence: {fluence/1e4}')
 
 
+    fig = plt.figure(figsize=(6,4))
+    colors = plt.cm.terrain(np.linspace(0.0, 1.0, 24))
 
-	NF = 40
-	factorF = np.logspace(-0.5,0.2,NF)
+    ax1 = fig.add_subplot(121)
+    ax1.plot(ratios['time'], ratios['sre'], label=r"$\mathrm{SRE}$", c="0.5", lw=2, zorder=5)
+    ax1.plot(ratios['time'], ratios['mre'], label=r"$\mathrm{MRE}$", c="darkred", lw=2, zorder=4)
+    ax1.plot(ratios['time'], ratios['dre'], label=r"$\mathrm{DRE}$", c=colors[2], lw=2, zorder=6)
 
-	# (b) SRE
-	ratio_sre2 = []
-	for i in range(NF):
-		sio2 = pp.Material(rate_equation="sre", index=1.5, bandgap=9.*c.e, alpha_sre=0.0004, \
-			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_sre*factorF[i]**2.)
-		for n in t:
-			laser.time_step(dt)
-			sio2.update_rho(laser,dt)
-		ratio_sre2.append(sio2.rho_ii/sio2.rho)
+    ax1.axvline(x = 80, ls=(1, (1, 2)), color="0.6", zorder=3)
+    ax1.axhline(y = 0.375, xmin=0.25, ls=(1, (1, 2)), color="0.6", zorder=3)
+    ax1.text(45, 0.385, r"$75\%$", size=12, color="0.45")
+    ax1.axvline(x = 24, ls=(1, (1, 1)), color="0.6")
 
+    rect = patches.Rectangle((-2,0), 26, 0.6, linewidth=1, edgecolor='0.85', facecolor='0.85')
+    ax1.add_patch(rect)
+    x_tail = -2.0
+    y_tail = 0.255
+    x_head = 22
+    y_head = 2*y_tail
+    dx = x_head - x_tail
+    dy = y_head - y_tail
+    acolor = "0.5"
+    arrow = patches.FancyArrowPatch((x_tail, y_tail), (dx, dy), mutation_scale=20, edgecolor=acolor, facecolor=acolor, zorder=8)
+    ax1.add_patch(arrow)
+    ax1.text(3, 0.275, r"$9\,\hbar\omega$", size=12, color="0.35")
 
-	# (b) MRE
-	ratio_mre2 = []
-	for i in range(NF):
-		sio2 = pp.Material(rate_equation="mre", index=1.5, bandgap=9.*c.e, \
-			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_mre*factorF[i]**2.)
-		for n in t:
-			laser.time_step(dt)
-			sio2.update_rho(laser,dt)
-		ratio_mre2.append(sio2.rho_ii/sio2.rho)
+    plt.ylim(0, 0.5)
+    plt.xlim(-2, ratios['time'].max() + 2)
+    plt.ylabel(r"$\rho_{\mathrm{ii}}/\rho$")
+    plt.xlabel(r"$t~[\mathrm{fs}]$", labelpad=0)
 
-
-	# (b) DRE
-	ratio_dre2 = []
-	for i in range(NF):
-		sio2 = pp.Material(rate_equation="dre", index=1.5, bandgap=9.*c.e, \
-			damping=1e15, cross_section=1e-19, density=2e28, m_CB=1, m_VB=1)
-		laser = pp.Laser(wavelength=800e-9, phase=False, E0=E0_dre*factorF[i]**2.)
-		for n in t:
-			laser.time_step(dt)
-			sio2.update_rho(laser,dt)
-		ratio_dre2.append(sio2.rho_ii/sio2.rho)
+    ax1.set_xticks([0, 20, 40, 60, 80, 100])
 
 
 
+    ### (b) ###############################################################################
+    NF = 40
+    factorFs = np.logspace(-0.5, 0.2, NF)
 
-	f = plt.figure(figsize=(6,4))
-	colors = plt.cm.terrain(np.linspace(0.0, 1.0, 24))
+    ratios = {}
+    for params in [params_sre, params_mre, params_dre]:
 
-	ax1=f.add_subplot(1,2,1)
-	ax1.plot(t,ratio_sre,label=r"$\mathrm{SRE}$",c="0.5",lw=2,zorder=5)
-	ax1.plot(t,ratio_mre,label=r"$\mathrm{MRE}$",c="darkred",lw=2,zorder=4)
-	ax1.plot(t,ratio_dre,label=r"$\mathrm{DRE}$",c=colors[2],lw=2,zorder=6)
+        ratios[params['rate_equation']] = []
+        for i, factorF in enumerate(factorFs):
+            mat = Material(index=1.5, drude_params={'damping':1e15}, 
+                        ionization_params={'rate_equation':params['rate_equation'],
+                                            'bandgap':9*eV,'alpha_sre':0.0004,
+                                            'density':2e28,'cross_section':1e-19})
+            las = Laser(wavelength=800*nm, phase=False, E0=params['E0']*factorF**2)
+            dom = Domain()
+            dom.add_laser(las, remove_reflected_part=False)
+            dom.add_material(mat)
+            dom.add_observer(Observer('rho','return'))
+            dom.add_observer(Observer('rho_ii','return'))
+            results = dom.run(time, progress_bar=False)
+            ratios[params['rate_equation']].append((results['rho_ii']/results['rho']).max())
 
-	ax1.axvline(x = 80,ls=(1, (1, 2)),color="0.6",zorder=3)
-	ax1.axhline(y = 0.375,xmin=0.25,ls=(1, (1, 2)),color="0.6",zorder=3)
-	ax1.text(45,0.385,r"$75\%$",size=12,color="0.45")
-	ax1.axvline(x = 24,ls=(1, (1, 1)),color="0.6")
 
-	rect = patches.Rectangle((-2,0),26,0.6,linewidth=1,edgecolor='0.85',facecolor='0.85')
-	ax1.add_patch(rect)
-	x_tail = -2.0
-	y_tail = 0.255
-	x_head = 22
-	y_head = 2*y_tail
-	dx = x_head - x_tail
-	dy = y_head - y_tail
-	acolor = "0.5"
-	arrow = patches.FancyArrowPatch((x_tail, y_tail), (dx, dy), mutation_scale=20,edgecolor=acolor,facecolor=acolor,zorder=8)
-	ax1.add_patch(arrow)
-	ax1.text(3,0.275,r"$9\,\hbar\omega$",size=12,color="0.35")
+    ax2 = fig.add_subplot(122)
+    ax2.plot(factorFs, ratios['sre'], label=r"$\mathrm{SRE}$", c="0.5", lw=2, zorder=5)
+    ax2.plot(factorFs, ratios['mre'], label=r"$\mathrm{MRE}$", c="darkred", lw=2)
+    ax2.plot(factorFs, ratios['dre'], label=r"$\mathrm{DRE}$", c=colors[2], lw=2, zorder=6)
+    ax2.legend(loc=(0.5,0.2), fontsize=12, frameon=False)
+    plt.xlim(factorFs.min(), factorFs.max())
+    plt.xlabel(r"$F/F_\mathrm{av}$", labelpad=0)
+    ax2.yaxis.tick_right()
 
-	plt.ylim(0,0.5)
-	plt.xlim(-2,t.max()+2)
-	plt.ylabel(r"$\rho_{\mathrm{ii}}/\rho$")
-	plt.xlabel(r"$t~[\mathrm{fs}]$",labelpad=0)
+    plt.yscale("log")
+    plt.ylim(1e-3, 1e0)
 
-	ax1.set_xticks([0,20,40,60,80,100])
+    ax1.text(2, 0.46, r"$\mathrm{(a)}$")
+    ax2.text(0.35, 0.55, r"$\mathrm{(b)}$")
 
-	ax2=f.add_subplot(1,2,2)
-	ax2.plot(factorF,ratio_sre2,label=r"$\mathrm{SRE}$",c="0.5",lw=2,zorder=5)
-	ax2.plot(factorF,ratio_mre2,label=r"$\mathrm{MRE}$",c="darkred",lw=2)
-	ax2.plot(factorF,ratio_dre2,label=r"$\mathrm{DRE}$",c=colors[2],lw=2,zorder=6)
-	ax2.legend(loc=(0.5,0.2),fontsize=12,frameon=False)
-	plt.xlim(factorF.min(),factorF.max())
-	plt.xlabel(r"$F/F_\mathrm{av}$",labelpad=0)
-	ax2.yaxis.tick_right()
+    plt.tight_layout()
+    plt.subplots_adjust(wspace = 0.1)
 
-	plt.yscale("log")
-	plt.ylim(1e-3,1e0)
+    # plt.savefig("ratio.pdf")
+    # os.system("pdfcrop ratio.pdf ratio.pdf > /dev/null")
 
-	ax1.text(2,0.46,r"$\mathrm{(a)}$")
-	ax2.text(0.35,0.55,r"$\mathrm{(b)}$")
-
-	plt.tight_layout()
-	plt.subplots_adjust(wspace = 0.1)
-
-	plt.savefig("ratio.pdf")
-	os.system("pdfcrop ratio.pdf ratio.pdf > /dev/null")
-
-	# plt.show()
+    plt.show()

@@ -1,11 +1,8 @@
-#! /usr/bin/python
-# -*- coding: utf-8 -*-
 """
 
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 plt.rcParams['ps.useafm'] = True
 plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'serif'
@@ -13,7 +10,6 @@ plt.rcParams.update({'font.size': 14})
 import os
 
 from pyplasma import *
-from pyplasma.field_ionization import fi_rate
 from pyplasma.misc import el_Ekin_max, ee_coll_freq
 import scipy.constants as c
 

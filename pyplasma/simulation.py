@@ -1,5 +1,3 @@
-#! /usr/bin/python
-# -*- coding: utf-8 -*-
 """
 
 """
@@ -58,8 +56,9 @@ class Domain():
     def run(self, time, progress_bar:bool=True):
         self.times = time.t
         self.dt = time.dt
+        self.progress_bar = progress_bar
 
-        if progress_bar:
+        if self.progress_bar:
             self.times = tqdm.tqdm(time.t, 'Running')
 
         self.set_boundaries(time.dt)

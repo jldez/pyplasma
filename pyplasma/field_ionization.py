@@ -1,5 +1,3 @@
-#! /usr/bin/python
-# -*- coding: utf-8 -*-
 """
 
 """
@@ -80,12 +78,12 @@ def fi_rate(E, material, laser, tol=1e-3):
 
 
 # TODO : expose N to API, because it is a major bottleneck to be fine tuned
-def fi_table(material, laser, N=200, tol=1e-3, progress_bar=True):
+def fi_table(material, laser, N=200, tol=1e-3):
 
 	Es = np.logspace(3,np.log10(3*laser.E0),int(N))
 	table = bd.zeros((N,2))
 
-	if progress_bar:
+	if material.domain.progress_bar:
 		Es = tqdm.tqdm(Es, 'Pre-calculate FI table')
 
 	for i, E in enumerate(Es):
