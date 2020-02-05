@@ -246,8 +246,8 @@ class Material():
 
 
 	def get_number_mre_levels(self):
-		critical_energy = (1.0+self.m_red/self.m_VB) * (self.bandgap + ponderomotive_energy(self.domain.laser.E0, self, self.domain.laser))
-		return int(get_critical_energy/(c.hbar*self.domain.laser.omega) + 1)
+		# critical_energy = (1.0+self.m_red/self.m_VB) * (self.bandgap + ponderomotive_energy(self.domain.laser.E0, self, self.domain.laser))
+		return int(get_critical_energy(self.domain.laser.E0, self, self.domain.laser)/(c.hbar*self.domain.laser.omega) + 1)
 
 
 	@staticmethod
