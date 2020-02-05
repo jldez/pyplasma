@@ -36,9 +36,9 @@ def get_critical_energy(E, material, laser):
 # 	""" hole-molecule collision rate """
 # 	return material.cross_section*(material.density-material.rho)*(2.0*abs(material.Ekin_h)/material.m_VB/c.m_e)**0.5
 
-# def g_ee(material):
-# 	""" electron-electron collision rate """
-# 	return 4.*c.pi*c.epsilon_0/c.e**2.*(6./material.m_CB/c.m_e)**.5*(2.*material.Ekin/3.)**1.5
+def ee_coll_freq(Ekin, material):
+	""" electron-electron collision rate """
+	return 4*c.pi*c.epsilon_0/c.e**2*(6/material.m_CB/c.m_e)**0.5*(2*Ekin/3)**1.5
 
 
 def el_Ekin_max(E, material, laser):
@@ -57,7 +57,7 @@ def el_Ekin_max(E, material, laser):
 			Upper bound of the mean kinetic energy in Joules (float).
 	"""
 
-	Ec = get_critical_energy(E, material, laser)
+	Ec = get_critical_energy(0, material, laser) # For some reason, we have to use Ec at rest?
 	el_heating_rate = get_el_heating_rate(E, material, laser)
 
 	return (-1.5*Ec/(np.log(el_heating_rate*c.hbar*laser.omega\
