@@ -6,6 +6,7 @@
 import numpy as np
 import scipy.constants as c
 import tqdm
+import copy
 
 from .boundaries import *
 
@@ -71,6 +72,7 @@ class Domain():
 
             if self.D == 0:
                 self.update_plasma()
+                self.update_currents()
                 self.update_E()
                 self.observe()
 
@@ -97,8 +99,10 @@ class Domain():
     def update_plasma(self):
         E_amp = self.E_amp
         for material in self.materials:
-            material.field_ionization(E_amp)
-            material.impact_ionization(E_amp)
+            if material.rate_equation is not 'none':
+                material.field_ionization(E_amp)
+            if material.rate_equation in ['sre','mre','dre']:
+                material.impact_ionization(E_amp)
 
     def update_currents(self):
         self.update_bounded_current()
@@ -243,6 +247,7 @@ class Time():
     def __init__(self, start, end, Nt):
         self.t = np.linspace(start, end, int(Nt))
         self.dt = self.t[1] - self.t[0]
+        self.Nt = Nt
 
 
 
