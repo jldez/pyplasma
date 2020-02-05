@@ -3,7 +3,6 @@
 """
 
 """
-from __future__ import print_function,division
 import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams['ps.useafm'] = True
@@ -11,14 +10,17 @@ plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams.update({'font.size': 14})
 import os
-from pyplasma import impact_ionization as ii
+
+from pyplasma import *
+from pyplasma.impact_ionization import *
+import scipy.constants as c
 
 
 if __name__ == '__main__':
 
 	r = np.linspace(0,3,1000)
-	xi1 = ii.xi1(r)
-	xi2 = ii.xi2(r)
+	xi1 = xi1(r)
+	xi2 = xi2(r)
 
 	f = plt.figure(figsize=(6,3))
 	colors = plt.cm.terrain(np.linspace(0.0, 1.0, 24))
@@ -30,7 +32,7 @@ if __name__ == '__main__':
 	plt.xlabel(r"$r_s$")
 	plt.legend(loc=(0.1,0.1),frameon=False,handletextpad=0.5)
 	plt.tight_layout()
-	plt.savefig("xi.pdf")
-	os.system("pdfcrop xi.pdf xi.pdf > /dev/null")
+	# plt.savefig("xi.pdf")
+	# os.system("pdfcrop xi.pdf xi.pdf > /dev/null")
 
-	# plt.show()
+	plt.show()

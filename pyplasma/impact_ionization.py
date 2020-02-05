@@ -112,9 +112,9 @@ def dre(E, material, laser, dt, tracks=[]):
 	critical_energy = material.mask*get_critical_energy(E, material, laser)
 
 	r_e = (3*critical_energy/(2*material.Ekin+1e-100))**0.5
-	xi_e = material.mask*(bd.erfc(r_e) + 2*r_e/c.pi**0.5*bd.exp(-r_e**2))
+	xi_e = material.mask*xi(r_e)
 	r_h = (3*critical_energy/(2*material.Ekin_h+1e-100))**0.5
-	xi_h = material.mask*(bd.erfc(r_h) + 2*r_h/c.pi**0.5*bd.exp(-r_h**2))
+	xi_h = material.mask*xi(r_h)
 
 	material.Ekin += dt*(el_heating_rate*c.hbar*laser.omega - coll_freq_en*xi_e*critical_energy - \
 		material.Ekin*(material.fi_rate/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
@@ -127,3 +127,10 @@ def dre(E, material, laser, dt, tracks=[]):
 
 	return material.rho*(coll_freq_en*xi_e + coll_freq_hn*xi_h)
 
+
+def xi1(r):
+	return bd.erfc(r)
+def xi2(r):
+	return 2*r/c.pi**0.5*bd.exp(-r**2)
+def xi(r):
+	return xi1(r) + xi2(r)
