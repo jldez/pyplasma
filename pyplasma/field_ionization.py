@@ -10,26 +10,29 @@ from scipy.special import ellipk,ellipe,dawsn
 import tqdm
 
 from . import laser as las
+from .backend import backend as bd
 
 
 # Keldysh ionisation
-def fi_rate(material, laser, tol=1e-3):
+def fi_rate(E, material, laser, tol=1e-3):
 	"""
 	Calculate the field ionization rate according to Keldysh's formula.
 
 		Arguments:
+			E (float) : Amplitude of the electric field.
+
 			material (Material object): The material in which the plasma formation
 				takes place.
 
 			laser (Laser object): The laser that causes the plasma formation.
 
 		Returns:
-			fi_rate (float): The field ionization rate in 1/(sm^3). 
-			Divide by material's density to obtain the rate in 1/s.
+			fi_rate (float): The field ionization rate in 1/s. 
 	"""
 
-	E = abs(laser.E)
-	if (E<1e3) or material.rate_equation == 'None':
+	E = abs(E)
+
+	if (E<1e3) or material.rate_equation == 'none':
 		return 0.0
 
 	def CEI1(a):
@@ -70,29 +73,26 @@ def fi_rate(material, laser, tol=1e-3):
 
 	try:
 		return 4.0*laser.omega/(9.0*c.pi)*(material.m_red*c.m_e*laser.omega/(c.hbar*g1(E)**0.5))**1.5*Q(E) \
-			*np.exp(-c.pi*np.floor(g3(E)+1)*(CEI1(g1(E))-CEI2(g1(E)))/CEI2(g2(E)))
+			*np.exp(-c.pi*np.floor(g3(E)+1)*(CEI1(g1(E))-CEI2(g1(E)))/CEI2(g2(E))) /material.density
 	except:
 		return 0.0
 
 
 
+# TODO : expose N to API, because it is a major bottleneck to be fine tuned
+def fi_table(material, laser, N=200, tol=1e-3, progress_bar=True):
 
-def fi_table(material, laser, N=1000, tol=1e-3, output=None, progress_bar=True):
-
-	Es = np.logspace(3,np.log10(5*laser.E0),int(N))
-	table = []
+	Es = np.logspace(3,np.log10(3*laser.E0),int(N))
+	table = bd.zeros((N,2))
 
 	if progress_bar:
-		Es = tqdm.tqdm(Es)
+		Es = tqdm.tqdm(Es, 'Pre-calculate FI table')
 
-	for E in Es:
-		fake_laser = las.Fake_Laser(E=E, omega=laser.omega)
-		rate = fi_rate(material, fake_laser, tol=tol)
-		table.append([E,rate])
-	table = np.array(table)
+	for i, E in enumerate(Es):
+		rate = fi_rate(E, material, laser, tol=tol)
+		table[i,0] = E
+		table[i,1] = rate
 
-	if output != None:
-		np.save(output+'.npy', table)
 	return table
 
 

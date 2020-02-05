@@ -379,7 +379,7 @@ def propagate3d(Time, Domain, output = ["rho","electric_field"], out_step=1, \
         Domain.fields['H'][:Domain.nb_pml,...] -= dt/Domain.dx/c.mu_0 * Domain.pml_xmin.phi_H
         Domain.fields['H'][-Domain.nb_pml:,...] -= dt/Domain.dx/c.mu_0 * Domain.pml_xmax.phi_H
 
-        print(int((time.time()-s)*1e6), 'us')
+        # print(int((time.time()-s)*1e6), 'us')
 
 
         if n%out_step == 0:

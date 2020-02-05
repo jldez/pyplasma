@@ -4,25 +4,30 @@
 
 """
 from __future__ import print_function,division
-import numpy as np
+import copy
 import scipy.constants as c
-from scipy.special import erfc
 
-from . import drude as dru
-from . import misc as mis
+from .misc import *
+from .backend import backend as bd
 
 
-def ii_rate(material,laser,dt):
+
+
+def ii_rate(E, material, laser, dt, tracks=[]):
 	"""
 	Calculate impact ionization rate according to the rate equation model chosen for the material.
 
 		Arguments:
+			E (float) : Amplitude of the electric field.
+
 			material (Material object): The material in which the plasma formation
 				takes place.
 
 			laser (Laser object): The laser that causes the plasma formation.
 
 			dt (float): The time step of the simulation.
+
+			tracks (list): The names of variables or a arrays to add to the material's attributes.
 
 		Returns:
 			ii_rate (float): The impact ionization rate in 1/(sm^3). 
@@ -32,98 +37,93 @@ def ii_rate(material,laser,dt):
 
 
 	if material.rate_equation.lower() in ["single","sre"]:
-		return sre(material,laser)
+		return sre(E, material, laser)
 	if material.rate_equation.lower() in ["multiple","mre"]:
-		return mre(material,laser,dt)
+		return mre(E, material, laser, dt, tracks)
 	if material.rate_equation.lower() in ["delayed","dre"]:
-		return dre(material,laser,dt)
+		return dre(E, material, laser, dt, tracks)
 
 
-def sre(material,laser):
+def sre(E, material, laser):
 	""" Single rate equation model """
 
-	intensity = c.c*material.index*c.epsilon_0*laser.E**2./2.
-	saturation = (material.density-material.rho)/material.density
-	return material.alpha_sre*material.rho*intensity*saturation
+	intensity = c.c*material.index*c.epsilon_0*E**2./2.
+	ii_rate = material.alpha_sre*material.rho*intensity
+
+	# Saturation FIXME :should be done simultaneously for both FI and II
+	ii_rate *= material.mask*(material.density-material.rho)/material.density
+
+	return ii_rate
 
 
-def mre(material,laser,dt):
+
+def mre(E, material, laser, dt, tracks=[]):
 	""" Multiple rate equation model """
 
-	if len(material.rho_k) == 0:
-		Ep = c.e**2.0*laser.E0**2.0/(4.0*material.m_red*c.m_e*(material.damping**2.0+laser.omega**2.0))
-		Ec = (1.0+material.m_red/material.m_VB)*(material.bandgap+Ep)
-		material.critical_energy = Ec
-		material.k = int(np.ceil(Ec/(c.hbar*laser.omega)))
-		material.rho_k = np.zeros((material.k+1))
-		material.rho_hk = np.zeros((material.k+1))
-
-	material.Ekin, material.Ekin_h = 0, 0
+	material.Ekin *= 0
+	material.Ekin_h *= 0
 	for ik in range(material.k+1)[1:]:
-		if material.rho > 0:
-			material.Ekin += ik*c.hbar*laser.omega*material.rho_k[ik]/material.rho
-			material.Ekin_h += ik*c.hbar*laser.omega*material.rho_hk[ik]/material.rho
+		material.Ekin += ik*c.hbar*laser.omega*material.rho_k[ik]/(material.rho + 1e-16)
+		material.Ekin_h += ik*c.hbar*laser.omega*material.rho_hk[ik]/(material.rho + 1e-16)
+	
+	A = c.e**2*material.damping*E**2/(2*c.hbar*laser.omega*(material.damping**2+laser.omega**2))
+	el_heating_rate = A/(material.m_CB*c.m_e)
+	hl_heating_rate = A/(material.m_VB*c.m_e)
 
-	ibh, ibh_h = dru.ibh(material,laser,s="e"), dru.ibh(material,laser,s="h")
-	coll_freq_en, coll_freq_hn = mis.g_en(material), mis.g_hn(material)
+	B = material.cross_section*(material.density-material.rho)
+	coll_freq_en = B*(2*material.Ekin/material.m_CB/c.m_e)**0.5
+	coll_freq_hn = B*(2*material.Ekin_h/material.m_VB/c.m_e)**0.5
 
-	rho_k_copy = material.rho_k.copy()
-	rho_hk_copy = material.rho_hk.copy()
+	rho_k_copy = copy.deepcopy(material.rho_k)
+	rho_hk_copy = copy.deepcopy(material.rho_hk)
 
-	# Electrons
-	material.rho_k[0] += dt*(material.rate_fi - ibh*rho_k_copy[0] + 2.*coll_freq_en*rho_k_copy[-1] \
+	# Electron cascade
+	material.rho_k[0] += dt*(material.fi_rate - el_heating_rate*rho_k_copy[0] + 2*coll_freq_en*rho_k_copy[-1] \
 		+ coll_freq_hn*rho_hk_copy[-1] - material.recombination_rate*rho_k_copy[0])
 	for ik in range(material.k)[1:]:
-		material.rho_k[ik] += dt*(ibh*(rho_k_copy[ik-1]-rho_k_copy[ik]) \
+		material.rho_k[ik] += dt*(el_heating_rate*(rho_k_copy[ik-1]-rho_k_copy[ik]) \
 			- material.recombination_rate*rho_k_copy[ik])
-	material.rho_k[-1] += dt*(ibh*rho_k_copy[-2] \
+	material.rho_k[-1] += dt*(el_heating_rate*rho_k_copy[-2] \
 		- coll_freq_en*rho_k_copy[-1] - material.recombination_rate*rho_k_copy[-1])
 
 	# Holes
-	material.rho_hk[0] += dt*(material.rate_fi - ibh_h*rho_hk_copy[0] + 2.*coll_freq_hn*rho_hk_copy[-1] \
+	material.rho_hk[0] += dt*(material.fi_rate - hl_heating_rate*rho_hk_copy[0] + 2.*coll_freq_hn*rho_hk_copy[-1] \
 		+ coll_freq_en*rho_k_copy[-1] - material.recombination_rate*rho_hk_copy[0])
 	for ik in range(material.k)[1:]:
-		material.rho_hk[ik] += dt*(ibh_h*(rho_hk_copy[ik-1]-rho_hk_copy[ik]) \
+		material.rho_hk[ik] += dt*(hl_heating_rate*(rho_hk_copy[ik-1]-rho_hk_copy[ik]) \
 			- material.recombination_rate*rho_hk_copy[ik])
-	material.rho_hk[-1] += dt*(ibh_h*rho_hk_copy[-2] \
+	material.rho_hk[-1] += dt*(hl_heating_rate*rho_hk_copy[-2] \
 		- coll_freq_hn*rho_hk_copy[-1] - material.recombination_rate*rho_hk_copy[-1])
 
-	return coll_freq_en*material.rho_k[material.k] + coll_freq_hn*material.rho_hk[material.k]
+	return material.mask*(coll_freq_en*material.rho_k[material.k] + coll_freq_hn*material.rho_hk[material.k])
 
 
-def dre(material,laser,dt):
+def dre(E, material, laser, dt, tracks=[]):
 	""" Delayed rate equation model """
 
-	ibh = dru.ibh(material,laser,s="e")
-	ibh_h = dru.ibh(material,laser,s="h")
-	coll_freq_en = mis.g_en(material)
-	coll_freq_hn = mis.g_hn(material)
-	Ep = c.e**2.0*laser.E**2.0/(4.0*material.m_red*c.m_e*(material.damping**2.0+laser.omega**2.0))
-	Ec = (1.0+material.m_red/material.m_VB)*(material.bandgap+Ep)
-	material.critical_energy = Ec
-	re, rh = r(Ec,material.Ekin), r(Ec,material.Ekin_h)
-	xi_e, xi_h = xi(re), xi(rh)
-	material.xi, material.xi_h = xi_e, xi_h
+	A = material.mask*c.e**2*material.damping*E**2/(2*c.hbar*laser.omega*(material.damping**2+laser.omega**2))
+	el_heating_rate = A/(material.m_CB*c.m_e)
+	hl_heating_rate = A/(material.m_VB*c.m_e)
 
-	temp, temp2 = material.Ekin, material.Ekin_h
-	material.Ekin += dt*(ibh*c.hbar*laser.omega - coll_freq_en*xi_e*Ec - \
-		material.Ekin*(material.rate_fi/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
-	material.Ekin_h += dt*(ibh_h*c.hbar*laser.omega - coll_freq_hn*xi_h*Ec - \
-		material.Ekin_h*(material.rate_fi/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
+	B = material.mask*material.cross_section*(material.density-material.rho)
+	coll_freq_en = B*(2*material.Ekin/material.m_CB/c.m_e)**0.5
+	coll_freq_hn = B*(2*material.Ekin_h/material.m_VB/c.m_e)**0.5
+
+	critical_energy = material.mask*get_critical_energy(E, material, laser)
+
+	r_e = (3*critical_energy/(2*material.Ekin+1e-100))**0.5
+	xi_e = material.mask*(bd.erfc(r_e) + 2*r_e/c.pi**0.5*bd.exp(-r_e**2))
+	r_h = (3*critical_energy/(2*material.Ekin_h+1e-100))**0.5
+	xi_h = material.mask*(bd.erfc(r_h) + 2*r_h/c.pi**0.5*bd.exp(-r_h**2))
+
+	material.Ekin += dt*(el_heating_rate*c.hbar*laser.omega - coll_freq_en*xi_e*critical_energy - \
+		material.Ekin*(material.fi_rate/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
+	material.Ekin_h += dt*(hl_heating_rate*c.hbar*laser.omega - coll_freq_hn*xi_h*critical_energy - \
+		material.Ekin_h*(material.fi_rate/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
+
+	for track in tracks:
+		track_array = eval(track)
+		setattr(material, track, track_array)
 
 	return material.rho*(coll_freq_en*xi_e + coll_freq_hn*xi_h)
 
-
-def r(Ec,Ekin):
-	return abs(3.*Ec/(2.*Ekin+1e-100))**.5
-def xi1(r):
-	return erfc(r)
-def xi2(r):
-	return 2.*r/c.pi**.5*np.exp(-r**2.)
-def xi(r):
-	return xi1(r) + xi2(r)
-
-
-
-if __name__ == '__main__':
-	pass

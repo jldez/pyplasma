@@ -22,6 +22,7 @@ A backend can be set with the `set_backend` function:
 
 # Numpy Backend
 import numpy  # numpy has to be present
+from scipy.special import erfc
 
 # Torch Backends (and flags)
 try:
@@ -64,6 +65,10 @@ class NumpyBackend(Backend):
     transpose = staticmethod(numpy.transpose)
     reshape = staticmethod(numpy.reshape)
     squeeze = staticmethod(numpy.squeeze)
+    argmin = staticmethod(numpy.argmin)
+    erfc = staticmethod(erfc)
+    flatten = staticmethod(numpy.ravel)
+    where = staticmethod(numpy.where)
 
     @staticmethod
     def bmm(arr1, arr2):
@@ -102,6 +107,10 @@ if TORCH_AVAILABLE:
         squeeze = staticmethod(torch.squeeze)
         reshape = staticmethod(torch.reshape)
         bmm = staticmethod(torch.bmm)
+        argmin = staticmethod(torch.argmin)
+        erfc = staticmethod(torch.erfc)
+        flatten = staticmethod(torch.flatten)
+        where = staticmethod(torch.where)
 
         @staticmethod
         def transpose(arr, axes=None):
