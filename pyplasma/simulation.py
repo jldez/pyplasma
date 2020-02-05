@@ -119,9 +119,8 @@ class Domain():
         for material in self.materials:
             if material.drude:
                 G = material.mask[...,None]*material.damping*self.dt/2
-                omega_p_squared = material.mask*c.e**2*material.rho/(c.epsilon_0*material.m_red*c.m_e)
                 self.fields['Jf'] = self.fields['Jf']*(1-G)/(1+G) \
-                                    + self.dt*c.epsilon_0*omega_p_squared[...,None]*self.fields['E']/(1+G)
+                                    + self.dt*c.epsilon_0*material.plasma_freq[...,None]*self.fields['E']/(1+G)
 
 
 
