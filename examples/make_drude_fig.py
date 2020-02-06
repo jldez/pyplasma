@@ -35,7 +35,7 @@ if __name__ == '__main__':
 		dom.add_observer(Observer('E', 'return'))
 
 		results = dom.run(time, progress_bar=False)
-		J = results['Jf'][:,0,0]
+		J = results['Jf']
 		E = results['E']
 
 		t, Nt = time.t, time.Nt

@@ -10,7 +10,7 @@ import tqdm
 
 
 def make_fig(s):
-	os.system("python3 make_"+s+"_fig.py")
+	os.system(f"python3 {os.path.dirname(os.path.abspath(__file__))}/make_{s}_fig.py")
 
 
 if __name__ == '__main__':
