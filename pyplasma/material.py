@@ -211,11 +211,11 @@ class Material():
 
 			
 	def add_roughness(self):
-		ix, rem = self.parse_index(self.boundaries['xmin']/self.domain.dx)
+		ind, rem = self.parse_index(self.boundaries['xmin']/self.domain.dx)
 		for iy in range(self.domain.Ny):
 			for iz in range(self.domain.Nz):
-				ix_r, rem_r = self.parse_index(ix + rem + (np.random.random()-0.5)*self.roughness/self.domain.dx)
-				self.mask[:ix_r,iy,iz] = 0
+				ir, rem_r = self.parse_index(np.random.random()*self.roughness/self.domain.dx)
+				self.mask[ind-ir:ind,iy,iz] = 1
 				# self.mask[ix_r,iy,iz] -= rem
 
 
