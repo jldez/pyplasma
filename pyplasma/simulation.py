@@ -5,6 +5,7 @@ import numpy as np
 import scipy.constants as c
 import tqdm
 import copy
+import matplotlib.pyplot as plt
 
 from .boundaries import *
 
@@ -38,9 +39,9 @@ class Domain():
         laser.remove_reflected_part = remove_reflected_part
         self.laser = laser
 
-    def add_material(self, material, boundaries:dict={}):
+    def add_material(self, material, boundaries:dict={}, roughness=0):
         # todo : check if overlap?
-        material.place_in_domain(self, boundaries)
+        material.place_in_domain(self, boundaries, roughness)
         self.materials.append(material)
 
     def add_observer(self, observer):
@@ -84,6 +85,7 @@ class Domain():
                 self.update_H()
                 self.observe()
 
+        plt.show()
         return self.return_data()
 
 

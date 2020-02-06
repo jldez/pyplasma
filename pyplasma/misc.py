@@ -26,16 +26,17 @@ def ee_coll_freq(Ekin, material):
 	return 4*c.pi*c.epsilon_0/c.e**2*(6/material.m_CB/c.m_e)**0.5*(2*Ekin/3)**1.5
 
 def el_Ekin_max(E, material, laser):
-	""" 
-	Upper bound estimation function for the mean kinetic energy of the electrons. 
+	""" Upper bound estimation function for the mean kinetic energy of the electrons. 
 	
 		Arguments:
+
+			E: Electric field of the laser during the simulation.
+
 			material (Material object): The material in which the plasma formation
 				takes place.
 
 			laser (Laser object): The laser that causes the plasma formation.
 
-			E (numpy array): Electric field of the laser during the simulation.
 
 		Returns:
 			Upper bound of the mean kinetic energy in Joules (float).

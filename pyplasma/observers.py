@@ -11,13 +11,13 @@ from .backend import backend as bd
 
 class Observer():
 
-    def __init__(self, target:str=None, mode:str='watch', x=None, y=None, z=None, ylim=(0,0), keep_pml=False, out_step=1):
+    def __init__(self, target:str=None, mode:str='watch', x=None, y=None, z=None, vlim=(0,0), keep_pml=False, out_step=1):
         self.target = target
         self.mode = mode
         self.x = x
         self.y = y
         self.z = z
-        self.ylim = ylim
+        self.vlim = vlim
         self.keep_pml = keep_pml
         self.out_step = out_step
 
@@ -74,7 +74,7 @@ class Observer():
         if self.viewer is None:
 
             if self.D == 0:
-                self.viewer = Viewer0d(self.domain, self.target, self.ylim)
+                self.viewer = Viewer0d(self.domain, self.target, self.vlim)
 
             if self.D == 1:
                 if self.x is None:
@@ -83,10 +83,19 @@ class Observer():
                     axis = {'y': np.linspace(0, self.domain.Ly, self.domain.Ny)}
                 if self.z is None:
                     axis = {'z': np.linspace(0, self.domain.Lz, self.domain.Nz)}
-                self.viewer = Viewer1d(axis, self.domain, self.target, self.ylim, self.keep_pml)
+                self.viewer = Viewer1d(axis, self.domain, self.target, self.vlim, self.keep_pml)
 
             if self.D == 2:
-                raise NotImplementedError('2D view is not available.')
+                if self.x is not None:
+                    axes = {'y': np.linspace(0, self.domain.Ly, self.domain.Ny),
+                            'z': np.linspace(0, self.domain.Lz, self.domain.Nz)}
+                if self.y is not None:
+                    axes = {'x': np.linspace(0, self.domain.Lx, self.domain.Nx),
+                            'z': np.linspace(0, self.domain.Lz, self.domain.Nz)}
+                if self.z is not None:
+                    axes = {'x': np.linspace(0, self.domain.Lx, self.domain.Nx),
+                            'y': np.linspace(0, self.domain.Ly, self.domain.Ny)}
+                self.viewer = Viewer2d(axes, self.domain, self.target, self.vlim, self.keep_pml)
 
             if self.D == 3:
                 raise NotImplementedError('3D view is not available.')
@@ -166,27 +175,29 @@ class Observer():
 
 class Viewer():
 
-    def __init__(self, domain, target='', ylim=(0,0)):
+    def __init__(self, domain, target='', vlim=(0,0)):
         self.domain = domain
         self.target = target
 
-        self.min_value = ylim[0]
-        self.max_value = ylim[1]
+        self.min_value = vlim[0]
+        self.max_value = vlim[1]
 
         self.fig = plt.figure()
         self.fig.canvas.set_window_title(self.target)
         self.fig.show()
         self.fig.canvas.draw()
 
-    def update(self):
-        pass
+    def update(self, time, data):
+
+        self.min_value = min(self.min_value, data.min())
+        self.max_value = max(self.max_value, data.max())
 
 
 
 class Viewer0d(Viewer):
 
-    def __init__(self, domain, target, ylim=(0,0)):
-        super(Viewer0d, self).__init__(domain, target, ylim)
+    def __init__(self, domain, target, vlim=(0,0)):
+        super(Viewer0d, self).__init__(domain, target, vlim)
 
         self.time_axis = []
         self.data_axis = []
@@ -198,9 +209,7 @@ class Viewer0d(Viewer):
 
 
     def update(self, time, data):
-
-        self.min_value = min(self.min_value, data.min())
-        self.max_value = max(self.max_value, data.max())
+        super(Viewer0d, self).update(time, data)
 
         self.time_axis.append(time)
         self.data_axis.append(data)
@@ -215,8 +224,8 @@ class Viewer0d(Viewer):
 
 class Viewer1d(Viewer):
 
-    def __init__(self, axis, domain, target, ylim=(0,0), show_pml=False):
-        super(Viewer1d, self).__init__(domain, target, ylim)
+    def __init__(self, axis, domain, target, vlim=(0,0), show_pml=False):
+        super(Viewer1d, self).__init__(domain, target, vlim)
 
         axis_name = list(axis.keys())[0]
         axis_values = axis[axis_name]
@@ -240,13 +249,44 @@ class Viewer1d(Viewer):
 
 
     def update(self, time, data):
-
-        self.min_value = min(self.min_value, data.min())
-        self.max_value = max(self.max_value, data.max())
+        super(Viewer1d, self).update(time, data)
 
         self.line.set_ydata(data)
         self.ax.set_ylim(self.min_value, self.max_value)
 
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
+
+
+
+class Viewer2d(Viewer):
+
+    def __init__(self, axes, domain, target, vlim=(0,0), show_pml=False):
+        super(Viewer2d, self).__init__(domain, target, vlim)
+
+        self.axes = axes
+
+        self.ax = self.fig.add_subplot(111)
+        self.img = None
+
+    def update(self, time, data):
+        # super(Viewer2d, self).update(time, data)
+
+        data = np.rot90(data)
+
+        if self.img is None:
+            self.img = self.ax.imshow(data, 
+                                      extent=[self.axes['y'].min(), self.axes['y'].max(), 
+                                              self.axes['z'].min(), self.axes['z'].max()],
+                                      cmap='seismic'
+                                     )
+
+        self.img.set_data(data)
+        self.img.set_clim(data.min(), data.max())
+
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
+
+
+
 

@@ -129,23 +129,28 @@ class Material():
 			self.mask = 1
 
 
-	def place_in_domain(self, domain, boundaries):
+	def place_in_domain(self, domain, boundaries, roughness=0):
 
 		self.domain = domain
 		self.boundaries = boundaries
+		self.roughness = roughness
 		self.mask = bd.ones(self.domain.grid)
 
 		if self.domain.D > 0:
 
-			try: # xmin
-				ind, rem = self.parse_index(boundaries['xmin']/self.domain.dx)
-				# if material boundary is in pml region, fill all pmls with material
-				if ind <= int(self.domain.pml_width/self.domain.dx):
-					self.boundaries['xmin'] = self.domain.x.min()
-				else:
-					self.mask[:ind] = 0
-					self.mask[ind] -= rem
-			except: self.boundaries['xmin'] = self.domain.x.min()
+			if roughness == 0:
+				try: # xmin
+					ind, rem = self.parse_index(boundaries['xmin']/self.domain.dx)
+					# if material boundary is in pml region, fill all pmls with material
+					if ind <= int(self.domain.pml_width/self.domain.dx):
+						self.boundaries['xmin'] = self.domain.x.min()
+					else:
+						self.mask[:ind] = 0
+						# self.mask[ind] -= rem
+				except: self.boundaries['xmin'] = self.domain.x.min()
+
+			else: # Roughness applies only to xmin boundary
+				self.add_roughness()
 
 			try: # xmax
 				ind, rem = self.parse_index(boundaries['xmax']/self.domain.dx)
@@ -182,6 +187,7 @@ class Material():
 			except: self.boundaries['zmax'] = self.domain.z.max()
 
 
+
 		if self.rate_equation == 'mre':
 
 			self.k = self.get_number_mre_levels()
@@ -204,6 +210,13 @@ class Material():
 		self.rho *= self.mask
 
 			
+	def add_roughness(self):
+		ix, rem = self.parse_index(self.boundaries['xmin']/self.domain.dx)
+		for iy in range(self.domain.Ny):
+			for iz in range(self.domain.Nz):
+				ix_r, rem_r = self.parse_index(ix + rem + (np.random.random()-0.5)*self.roughness/self.domain.dx)
+				self.mask[:ix_r,iy,iz] = 0
+				# self.mask[ix_r,iy,iz] -= rem
 
 
 
