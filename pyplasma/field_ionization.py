@@ -4,7 +4,7 @@
 from __future__ import print_function,division
 import numpy as np
 import scipy.constants as c
-from scipy.special import ellipk,ellipe,dawsn
+from scipy.special import ellipk, ellipe, dawsn
 import tqdm
 
 from . import laser as las

@@ -5,7 +5,6 @@ from __future__ import print_function,division
 import copy
 import scipy.constants as c
 
-
 from .misc import *
 from .backend import backend as bd
 
