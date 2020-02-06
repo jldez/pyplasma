@@ -5,6 +5,7 @@ from __future__ import print_function,division
 import copy
 import scipy.constants as c
 
+
 from .misc import *
 from .backend import backend as bd
 
@@ -107,14 +108,14 @@ def dre(E, material, laser, dt, tracks=[]):
 	hl_heating_rate = get_hl_heating_rate(E, material, laser)
 
 	B = material.mask*material.cross_section*(material.density-material.rho)
-	coll_freq_en = B*(2*material.Ekin/material.m_CB/c.m_e)**0.5
-	coll_freq_hn = B*(2*material.Ekin_h/material.m_VB/c.m_e)**0.5
+	coll_freq_en = B*bd.abs(2*material.Ekin/material.m_CB/c.m_e)**0.5
+	coll_freq_hn = B*bd.abs(2*material.Ekin_h/material.m_VB/c.m_e)**0.5
 
 	critical_energy = material.mask*get_critical_energy(E, material, laser)
 
-	r_e = (3*critical_energy/(2*material.Ekin+1e-100))**0.5
+	r_e = bd.abs(3*critical_energy/(2*material.Ekin+1e-100))**0.5
 	xi_e = material.mask*xi(r_e)
-	r_h = (3*critical_energy/(2*material.Ekin_h+1e-100))**0.5
+	r_h = bd.abs(3*critical_energy/(2*material.Ekin_h+1e-100))**0.5
 	xi_h = material.mask*xi(r_h)
 
 	material.Ekin += dt*(el_heating_rate*c.hbar*laser.omega - coll_freq_en*xi_e*critical_energy - \

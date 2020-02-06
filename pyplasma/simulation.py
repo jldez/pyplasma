@@ -102,6 +102,7 @@ class Domain():
                 material.field_ionization(E_amp)
             if material.rate_equation in ['sre','mre','dre']:
                 material.impact_ionization(E_amp)
+            material.recombination()
 
     def update_currents(self):
         self.update_bounded_current()

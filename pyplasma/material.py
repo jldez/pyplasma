@@ -242,9 +242,13 @@ class Material():
 		self.rho += self.domain.dt*self.ii_rate
 
 
+	def recombination(self):
+		self.rho -= self.domain.dt*self.rho*self.recombination_rate
+		# self.rho = bd.clip(self.rho, 0, self.density) # Prevent errors?
+
+
 
 	def get_number_mre_levels(self):
-		# critical_energy = (1.0+self.m_red/self.m_VB) * (self.bandgap + ponderomotive_energy(self.domain.laser.E0, self, self.domain.laser))
 		return int(get_critical_energy(self.domain.laser.E0, self, self.domain.laser)/(c.hbar*self.domain.laser.omega) + 1)
 
 
@@ -255,7 +259,7 @@ class Material():
 
 	@property
 	def plasma_freq(self):
-		return (c.e**2*self.rho/(c.epsilon_0*self.m_red*c.m_e))**.5
+		return bd.abs((c.e**2*self.rho/(c.epsilon_0*self.m_red*c.m_e)))**.5
 
 	@property
 	def _Drude_index(self):

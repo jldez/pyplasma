@@ -69,6 +69,8 @@ class NumpyBackend(Backend):
     erfc = staticmethod(erfc)
     flatten = staticmethod(numpy.ravel)
     where = staticmethod(numpy.where)
+    abs = staticmethod(numpy.abs)
+    clip = staticmethod(numpy.clip)
 
     @staticmethod
     def bmm(arr1, arr2):
@@ -111,6 +113,8 @@ if TORCH_AVAILABLE:
         erfc = staticmethod(torch.erfc)
         flatten = staticmethod(torch.flatten)
         where = staticmethod(torch.where)
+        abs = staticmethod(torch.abs)
+        clip = staticmethod(torch.clamp)
 
         @staticmethod
         def transpose(arr, axes=None):
