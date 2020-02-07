@@ -41,11 +41,11 @@ class Periodic(Boundary):
 
     def update_H(self):
         if self.boundary == 'x':
-            self.domain.fields['H'][0, :, :, :] = self.domain.fields['H'][-1, :, :, :]
+            self.domain.fields['H'][-1, :, :, :] = self.domain.fields['H'][0, :, :, :]
         if self.boundary == 'y':
-            self.domain.fields['H'][:, 0, :, :] = self.domain.fields['H'][:, -1, :, :]
+            self.domain.fields['H'][:, -1, :, :] = self.domain.fields['H'][:, 0, :, :]
         if self.boundary == 'z':
-            self.domain.fields['H'][:, :, 0, :] = self.domain.fields['H'][:, :, -1, :]
+            self.domain.fields['H'][:, :, -1, :] = self.domain.fields['H'][:, :, 0, :]
 
 
 
