@@ -90,7 +90,6 @@ class Domain():
                 self.update_H()
                 self.observe()
 
-        plt.show()
         return self.return_data()
 
 
