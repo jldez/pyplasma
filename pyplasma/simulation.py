@@ -33,8 +33,10 @@ class Domain():
         self.initialize_fields()
 
     
-    def add_laser(self, laser, position='default', remove_reflected_part=False):
+    def add_laser(self, laser, source_mode='TFSF', position='default', remove_reflected_part=False):
+        # TODO: polarization axis
         laser.domain = self
+        laser.source_mode = source_mode
         laser.position = self.pml_width if position == 'default' else position
         laser.remove_reflected_part = remove_reflected_part
         self.laser = laser
@@ -146,9 +148,15 @@ class Domain():
             self.fields['E'] -= self.dt*self.fields['Jfi']/c.epsilon_0
 
             # add sources
+            # TFSF implementation might not be perfect. See references:
+            # Section 3.0 of : https://studylib.net/doc/8392930/6.-total-field---scattered-field-fdtd-implementation-in-m...
+            # Section 3.10 of : https://www.eecs.wsu.edu/~schneidj/ufdtd/chap3.pdf
             if self.laser is not None:
                 laser_E = self.laser.E(self.t)
-                self.fields['E'][self.laser.index_in_domain,...,2] += self.dt/(c.epsilon_0*self.dx)*laser_E/(120*c.pi)
+                if self.laser.source_mode.lower() == 'tfsf':
+                    self.fields['E'][self.laser.index_in_domain,...,2] += self.dt/(c.epsilon_0*self.dx)*laser_E/(120*c.pi)
+                elif self.laser.source_mode.lower() == 'hard':
+                    self.fields['E'][self.laser.index_in_domain,...,2] = laser_E
 
             # boundaries
             for boundary in self.boundaries:
@@ -166,7 +174,10 @@ class Domain():
             # add sources
             if self.laser is not None and self.D > 0:
                 laser_E = self.laser.E(self.t)
-                self.fields['H'][int(self.laser.position/self.dx),...,1] -= self.dt/(c.mu_0*self.dx)*laser_E
+                if self.laser.source_mode.lower() == 'tfsf':
+                    self.fields['H'][self.laser.index_in_domain,...,1] -= self.dt/(c.mu_0*self.dx)*laser_E
+                elif self.laser.source_mode.lower() == 'hard':
+                    pass
 
             # boundaries
             for boundary in self.boundaries:
