@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
 	for ax, damping in zip([ax1,ax2,ax3], [0, 1, 10]):
 
-		mat = Material(index=1, drude_params={'damping':damping, 'm_VB':np.inf, 'rho':4.008e18})
+		mat = Material(index=1, drude_params={'damping':damping, 'm_VB':np.inf, 'rho':3.5e7})
 		las = Laser(omega=1, E0=1, t0=-4.0*c.pi, phase=True)
 		time = Time(-4.0*c.pi, 1.2*c.pi, 1e3)
 
