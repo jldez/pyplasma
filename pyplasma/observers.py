@@ -175,6 +175,8 @@ class Observer():
 
 class Viewer():
 
+    # TODO: loop over video once simulation done
+
     def __init__(self, domain, target='', vlim=(0,0)):
         self.domain = domain
         self.target = target
@@ -271,6 +273,7 @@ class Viewer2d(Viewer):
 
     def update(self, time, data):
         # super(Viewer2d, self).update(time, data)
+        # TODO: slice along the correct axes
 
         data = np.rot90(data)
 

@@ -190,7 +190,7 @@ class Domain():
         if self.D == 0:
             return self.fields['E']
         else:
-            return (self.fields['E'][...,0]**2+self.fields['E'][...,1]**2+self.fields['E'][...,2]**2)**0.5
+            return (self.fields['E'][...,0]**2 + self.fields['E'][...,1]**2 + self.fields['E'][...,2]**2)**0.5
 
 
     def observe(self):
