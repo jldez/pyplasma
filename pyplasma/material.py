@@ -138,18 +138,17 @@ class Material():
 
 		if self.domain.D > 0:
 
-			if roughness == 0:
-				try: # xmin
-					ind, rem = self.parse_index(boundaries['xmin']/self.domain.dx)
-					# if material boundary is in pml region, fill all pmls with material
-					if ind <= int(self.domain.pml_width/self.domain.dx):
-						self.boundaries['xmin'] = self.domain.x.min()
-					else:
-						self.mask[:ind] = 0
-						# self.mask[ind] -= rem
-				except: self.boundaries['xmin'] = self.domain.x.min()
+			try: # xmin
+				ind, rem = self.parse_index(boundaries['xmin']/self.domain.dx)
+				# if material boundary is in pml region, fill all pmls with material
+				if ind <= int(self.domain.pml_width/self.domain.dx):
+					self.boundaries['xmin'] = self.domain.x.min()
+				else:
+					self.mask[:ind] = 0
+					# self.mask[ind] -= rem
+			except: self.boundaries['xmin'] = self.domain.x.min()
 
-			else: # Roughness applies only to xmin boundary
+			if roughness > 0: # Roughness applies only to xmin boundary
 				self.add_roughness()
 
 			try: # xmax
@@ -159,31 +158,31 @@ class Material():
 					self.boundaries['xmax'] = self.domain.x.max()
 				else:
 					self.mask[ind+1:] = 0
-					self.mask[ind] -= 1-rem
+					# self.mask[ind] -= 1-rem
 			except: self.boundaries['xmax'] = self.domain.x.max()
 
 			try: # ymin
 				ind, rem = self.parse_index(boundaries['ymin']/self.domain.dy)
 				self.mask[:,:ind] = 0
-				self.mask[:,ind] -= rem
+				# self.mask[:,ind] -= rem
 			except: self.boundaries['ymin'] = self.domain.y.min()
 
 			try: # ymax
 				ind, rem = self.parse_index(boundaries['ymax']/self.domain.dy)
 				self.mask[:,ind+1:] = 0
-				self.mask[:,ind] -= 1-rem
+				# self.mask[:,ind] -= 1-rem
 			except: self.boundaries['ymax'] = self.domain.y.max()
 
 			try: # zmin
 				ind, rem = self.parse_index(boundaries['zmin']/self.domain.dz)
 				self.mask[:,:,:ind] = 0
-				self.mask[:,:,ind] -= rem
+				# self.mask[:,:,ind] -= rem
 			except: self.boundaries['zmin'] = self.domain.z.min()
 
 			try: # zmax
 				ind, rem = self.parse_index(boundaries['zmax']/self.domain.dz)
 				self.mask[:,:,ind+1:] = 0
-				self.mask[:,:,ind] -= 1-rem
+				# self.mask[:,:,ind] -= 1-rem
 			except: self.boundaries['zmax'] = self.domain.z.max()
 
 
@@ -211,12 +210,12 @@ class Material():
 
 			
 	def add_roughness(self):
-		ind, rem = self.parse_index(self.boundaries['xmin']/self.domain.dx)
-		for iy in range(self.domain.Ny):
-			for iz in range(self.domain.Nz):
-				ir, rem_r = self.parse_index(np.random.random()*self.roughness/self.domain.dx)
-				self.mask[ind-ir:ind,iy,iz] = 1
-				# self.mask[ix_r,iy,iz] -= rem
+		ix, rem = self.parse_index(self.boundaries['xmin']/self.domain.dx)
+		for iy in range(0,self.domain.Ny):
+			for iz in range(0,self.domain.Nz):
+				ir, rem_r = self.parse_index((self.boundaries['xmin']-np.random.random()*self.roughness)/self.domain.dx)
+				self.mask[ir:ix,iy,iz] = 1
+				# self.mask[ir,iy,iz] -= rem
 
 
 
