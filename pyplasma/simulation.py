@@ -70,6 +70,9 @@ class Domain():
             if material.rate_equation != 'none':
                 material.make_fi_table(self.laser)
 
+        if self.D > 0 and not self.is_stable:
+            print(f'Warning. Stability compromised by time steps too large by a factor: {self.dt/self.max_dt}.')
+
         for self.it, self.t in enumerate(self.times):
 
             if self.D == 0:
@@ -252,6 +255,20 @@ class Domain():
             self.nb_pml = int(self.pml_width/self.dx)
             self.boundaries = [PML(self, 'xmin', dt), PML(self, 'xmax', dt)]
             self.boundaries += [Periodic(self, 'y'), Periodic(self, 'z')]
+
+
+    @property
+    def max_dt(self):
+        delta = min([self.dx, self.dy, self.dz])
+        index_max = max([1]+[material.index for material in self.materials])
+        D = self.D
+        if D in [1,2] and index_max > 1:
+            D += 1
+        return  delta / (D**0.5 * c.c * index_max)
+
+    @property
+    def is_stable(self):
+        return self.dt < self.max_dt
 
 
 
