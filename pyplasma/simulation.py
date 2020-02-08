@@ -66,7 +66,9 @@ class Domain():
         self.progress_bar = progress_bar
 
         if self.progress_bar:
-            self.times = tqdm.tqdm(time.t, 'Running')
+            self.tqdm_times = tqdm.tqdm(time.t, 'Running')
+        else:
+            self.tqdm_times = time.t
 
         self.set_boundaries(time.dt)
 
