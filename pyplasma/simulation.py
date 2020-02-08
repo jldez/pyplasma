@@ -76,6 +76,9 @@ class Domain():
             if material.rate_equation != 'none':
                 material.make_fi_table(self.laser)
 
+        if self.D > 0:
+            print(f'Cell size: dx={self.dx/1e-9}nm, dy={self.dy/1e-9}nm, dz:{self.dz/1e-9}nm. Time steps: {self.dt/1e-15}fs/{self.max_dt/1e-15}fs.')
+
         if self.D > 0 and not self.is_stable:
             print(f'Warning. Stability compromised by time steps too large by a factor: {self.dt/self.max_dt}.')
 
@@ -271,10 +274,7 @@ class Domain():
     def max_dt(self):
         delta = min([self.dx, self.dy, self.dz])
         index_max = max([1]+[material.index for material in self.materials])
-        D = self.D
-        if D in [1,2] and index_max > 1:
-            D += 1
-        return  delta / (D**0.5 * c.c * index_max)
+        return  delta / (self.D**0.5 * c.c * index_max)
 
     @property
     def is_stable(self):
