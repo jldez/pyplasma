@@ -93,7 +93,7 @@ def mre(E, material, laser, dt, tracks=[]):
 		- coll_freq_hn*rho_hk_copy[-1] - material.recombination_rate*rho_hk_copy[-1])
 
 	for track in tracks:
-		track_array = eval(track)
+		track_array = copy.deepcopy(eval(track))
 		setattr(material, track, track_array)
 
 	return coll_freq_en*material.rho_k[material.k] + coll_freq_hn*material.rho_hk[material.k]
@@ -122,7 +122,7 @@ def dre(E, material, laser, dt, tracks=[]):
 		material.Ekin_h*(material.fi_rate/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
 
 	for track in tracks:
-		track_array = eval(track)
+		track_array = copy.deepcopy(eval(track))
 		setattr(material, track, track_array)
 
 	return material.rho*(coll_freq_en*xi_e + coll_freq_hn*xi_h)
