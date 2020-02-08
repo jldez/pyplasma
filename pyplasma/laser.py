@@ -9,8 +9,10 @@ import scipy.constants as c
 
 class Laser():
 
-	def __init__(self, wavelength=0, omega=0, phase=False, pulse_duration=np.inf, \
-				 fluence=0, E0=0, t0=0):
+	# FIXME: phase should be True by default
+	# TODO: Documentation
+
+	def __init__(self, wavelength=0, omega=0, phase=False, pulse_duration=np.inf, fluence=0, E0=0, t0=0):
 
 		self.wavelength = wavelength
 		self.omega = omega
