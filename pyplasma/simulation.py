@@ -106,9 +106,11 @@ class Domain():
         for boundary in self.boundaries:
             boundary.update_phi_E()
 
+
     def update_pml_H(self):
         for boundary in self.boundaries:
             boundary.update_phi_H()
+
 
     def update_plasma(self):
         E_amp = self.E_amp
@@ -120,9 +122,11 @@ class Domain():
             if material.rate_equation is not 'none':
                 material.recombination()
 
+
     def update_currents(self):
         self.update_bounded_current()
         self.update_free_current()
+
 
     def update_bounded_current(self):
         # TODO: Add reference to Varin's model
@@ -221,6 +225,7 @@ class Domain():
                 observer.terminate()
 
         return out_dico
+
 
 
 
