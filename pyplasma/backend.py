@@ -71,6 +71,7 @@ class NumpyBackend(Backend):
     where = staticmethod(numpy.where)
     abs = staticmethod(numpy.abs)
     clip = staticmethod(numpy.clip)
+    ceil = staticmethod(numpy.ceil)
 
     @staticmethod
     def bmm(arr1, arr2):
@@ -115,6 +116,7 @@ if TORCH_AVAILABLE:
         where = staticmethod(torch.where)
         abs = staticmethod(torch.abs)
         clip = staticmethod(torch.clamp)
+        ceil = staticmethod(torch.ceil)
 
         @staticmethod
         def transpose(arr, axes=None):
