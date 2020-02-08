@@ -145,7 +145,7 @@ class Material():
 					self.boundaries['xmin'] = self.domain.x.min()
 				else:
 					self.mask[:ind] = 0
-					# self.mask[ind] -= rem
+					self.mask[ind] -= rem
 			except: self.boundaries['xmin'] = self.domain.x.min()
 
 			if roughness > 0: # Roughness applies only to xmin boundary
@@ -158,31 +158,31 @@ class Material():
 					self.boundaries['xmax'] = self.domain.x.max()
 				else:
 					self.mask[ind+1:] = 0
-					# self.mask[ind] -= 1-rem
+					self.mask[ind] -= 1-rem
 			except: self.boundaries['xmax'] = self.domain.x.max()
 
 			try: # ymin
 				ind, rem = self.parse_index(boundaries['ymin']/self.domain.dy)
 				self.mask[:,:ind] = 0
-				# self.mask[:,ind] -= rem
+				self.mask[:,ind] -= rem
 			except: self.boundaries['ymin'] = self.domain.y.min()
 
 			try: # ymax
 				ind, rem = self.parse_index(boundaries['ymax']/self.domain.dy)
 				self.mask[:,ind+1:] = 0
-				# self.mask[:,ind] -= 1-rem
+				self.mask[:,ind] -= 1-rem
 			except: self.boundaries['ymax'] = self.domain.y.max()
 
 			try: # zmin
 				ind, rem = self.parse_index(boundaries['zmin']/self.domain.dz)
 				self.mask[:,:,:ind] = 0
-				# self.mask[:,:,ind] -= rem
+				self.mask[:,:,ind] -= rem
 			except: self.boundaries['zmin'] = self.domain.z.min()
 
 			try: # zmax
 				ind, rem = self.parse_index(boundaries['zmax']/self.domain.dz)
 				self.mask[:,:,ind+1:] = 0
-				# self.mask[:,:,ind] -= 1-rem
+				self.mask[:,:,ind] -= 1-rem
 			except: self.boundaries['zmax'] = self.domain.z.max()
 
 
@@ -205,25 +205,25 @@ class Material():
 			self.Ekin = bd.zeros(self.domain.grid)
 			self.Ekin_h = bd.zeros(self.domain.grid)
 
-
-		self.rho *= self.mask
-
-			
+	
 	def add_roughness(self):
 		ix, rem = self.parse_index(self.boundaries['xmin']/self.domain.dx)
-		for iy in range(0,self.domain.Ny):
-			for iz in range(0,self.domain.Nz):
+		for iy in range(0,self.domain.Ny-1):
+			for iz in range(0,self.domain.Nz-1):
 				ir, rem_r = self.parse_index((self.boundaries['xmin']-np.random.random()*self.roughness)/self.domain.dx)
-				self.mask[ir:ix,iy,iz] = 1
-				# self.mask[ir,iy,iz] -= rem
+				self.mask[ir:ix+1,iy,iz] = 1
+				self.mask[ir,iy,iz] -= rem_r
 
+		for iy in range(0,self.domain.Ny):
+			self.mask[:,iy,-1] = self.mask[:,iy,0]
+		for iz in range(0,self.domain.Nz):
+			self.mask[:,-1,iz] = self.mask[:,0,iz]
 
 
 	def make_fi_table(self, laser):
 		self.fi_table = fi.fi_table(self, laser)
 
 
-	
 	def field_ionization(self, E):
 
 		# # TODO : optionnal use of a fit instead
@@ -247,10 +247,9 @@ class Material():
 		self.domain.fields['Jfi'] = self.bandgap*self.fi_rate[...,None]*self.domain.fields['E']/(E[...,None]+1.0)**2.0
 
 
-
 	def impact_ionization(self, E):
 		tracks = [observer.target for observer in self.domain.observers if observer.target in self.trackables]
-		self.ii_rate = ii.ii_rate(E, self, self.domain.laser, self.domain.dt, tracks)
+		self.ii_rate = self.mask*ii.ii_rate(E, self, self.domain.laser, self.domain.dt, tracks)
 		self.rho += self.domain.dt*self.ii_rate
 
 
@@ -259,27 +258,29 @@ class Material():
 		# self.rho = bd.clip(self.rho, 0, self.density) # Prevent errors?
 
 
-
 	def get_number_mre_levels(self):
 		return int(get_critical_energy(self.domain.laser.E0, self, self.domain.laser)/(c.hbar*self.domain.laser.omega) + 1)
 
 
 	@staticmethod
 	def parse_index(float_index):
-		return int(float_index), float_index%1
+		return int(float_index),float_index%1
 
 
 	@property
 	def plasma_freq(self):
 		return bd.abs((c.e**2*self.rho/(c.epsilon_0*self.m_red*c.m_e)))**.5
 
+
 	@property
 	def _Drude_index(self):
 		# torch doesn't support complex numbers yet, so we have to do a detour in numpy
+		# This is mostly ok, because this is currently only used for 0D simulations.
 		wp = bd.numpy(self.plasma_freq)
 		self.drude_index = np.zeros(wp.shape, dtype=complex)
 		self.drude_index = np.sqrt(self.index**2 - wp**2 / (self.domain.laser.omega**2 + 1j*self.domain.laser.omega*self.damping))
 		return self.drude_index
+
 
 	@property
 	def Reflectivity(self):

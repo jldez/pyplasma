@@ -49,7 +49,7 @@ def sre(E, material, laser):
 	ii_rate = material.alpha_sre*material.rho*intensity
 
 	# Saturation FIXME :should be done simultaneously for both FI and II
-	ii_rate *= material.mask*(material.density-material.rho)/material.density
+	ii_rate *= (material.density-material.rho)/material.density
 
 	return ii_rate
 
@@ -97,7 +97,7 @@ def mre(E, material, laser, dt, tracks=[]):
 		track_array = eval(track)
 		setattr(material, track, track_array)
 
-	return material.mask*(coll_freq_en*material.rho_k[material.k] + coll_freq_hn*material.rho_hk[material.k])
+	return coll_freq_en*material.rho_k[material.k] + coll_freq_hn*material.rho_hk[material.k]
 
 
 def dre(E, material, laser, dt, tracks=[]):
@@ -106,16 +106,16 @@ def dre(E, material, laser, dt, tracks=[]):
 	el_heating_rate = get_el_heating_rate(E, material, laser)
 	hl_heating_rate = get_hl_heating_rate(E, material, laser)
 
-	B = material.mask*material.cross_section*(material.density-material.rho)
+	B = material.cross_section*(material.density-material.rho)
 	coll_freq_en = B*bd.abs(2*material.Ekin/material.m_CB/c.m_e)**0.5
 	coll_freq_hn = B*bd.abs(2*material.Ekin_h/material.m_VB/c.m_e)**0.5
 
-	critical_energy = material.mask*get_critical_energy(E, material, laser)
+	critical_energy = get_critical_energy(E, material, laser)
 
 	r_e = bd.abs(3*critical_energy/(2*material.Ekin+1e-100))**0.5
-	xi_e = material.mask*xi(r_e)
+	xi_e = xi(r_e)
 	r_h = bd.abs(3*critical_energy/(2*material.Ekin_h+1e-100))**0.5
-	xi_h = material.mask*xi(r_h)
+	xi_h = xi(r_h)
 
 	material.Ekin += dt*(el_heating_rate*c.hbar*laser.omega - coll_freq_en*xi_e*critical_energy - \
 		material.Ekin*(material.fi_rate/(material.rho+1e-10) + coll_freq_en*xi_e + coll_freq_hn*xi_h)) 
