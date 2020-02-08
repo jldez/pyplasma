@@ -35,7 +35,7 @@ if __name__ == '__main__':
 		dom.add_material(mat)
 
 		for target in ['rho','xi_e','rho_fi','rho_ii','Ekin','E','coll_freq_en','el_heating_rate']:
-			dom.add_observer(Observer(target,'return'))
+			dom.add_observer(Returner(target))
 
 		results = dom.run(time)
 		time.t /= fs

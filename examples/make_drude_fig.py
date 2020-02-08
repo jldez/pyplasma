@@ -1,8 +1,4 @@
-#! /usr/bin/python
-# -*- coding: utf-8 -*-
-"""
 
-"""
 import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams['ps.useafm'] = True
@@ -31,8 +27,8 @@ if __name__ == '__main__':
 		dom = Domain()
 		dom.add_laser(las)
 		dom.add_material(mat)
-		dom.add_observer(Observer('Jf', 'return'))
-		dom.add_observer(Observer('E', 'return'))
+		dom.add_observer(Returner('Jf'))
+		dom.add_observer(Returner('E'))
 
 		results = dom.run(time, progress_bar=False)
 		J = results['Jf']

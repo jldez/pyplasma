@@ -6,7 +6,7 @@ from .backend import set_backend
 from .simulation import Domain, Time
 from .laser import Laser
 from .material import Material
-from .observers import Observer
+from .observers import *
 
 import scipy.constants as c
 

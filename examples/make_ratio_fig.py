@@ -35,9 +35,9 @@ if __name__ == '__main__':
         dom = Domain()
         dom.add_laser(las, remove_reflected_part=False)
         dom.add_material(mat)
-        dom.add_observer(Observer('rho','return'))
-        dom.add_observer(Observer('rho_ii','return'))
-        dom.add_observer(Observer('E','return'))
+        dom.add_observer(Returner('rho'))
+        dom.add_observer(Returner('rho_ii'))
+        dom.add_observer(Returner('E'))
         results = dom.run(time, progress_bar=False)
         ratio = results['rho_ii']/results['rho']
         ratios[params['rate_equation']] = ratio
@@ -97,8 +97,8 @@ if __name__ == '__main__':
             dom = Domain()
             dom.add_laser(las, remove_reflected_part=False)
             dom.add_material(mat)
-            dom.add_observer(Observer('rho','return'))
-            dom.add_observer(Observer('rho_ii','return'))
+            dom.add_observer(Returner('rho'))
+            dom.add_observer(Returner('rho_ii'))
             results = dom.run(time, progress_bar=False)
             ratios[params['rate_equation']].append((results['rho_ii']/results['rho']).max())
 

@@ -47,8 +47,12 @@ class Domain():
         self.materials.append(material)
 
     def add_observer(self, observer):
-        observer.place_in_domain(self)
-        self.observers.append(observer)
+        if type(observer) == list:
+            for obs in observer:
+                self.add_observer(obs)
+        else:
+            observer.place_in_domain(self)
+            self.observers.append(observer)
 
     def initialize_fields(self):
         self.fields = {}
@@ -73,7 +77,7 @@ class Domain():
         if self.D > 0 and not self.is_stable:
             print(f'Warning. Stability compromised by time steps too large by a factor: {self.dt/self.max_dt}.')
 
-        for self.it, self.t in enumerate(self.times):
+        for self.it, self.t in enumerate(self.tqdm_times):
 
             if self.D == 0:
                 self.update_plasma()
@@ -90,7 +94,7 @@ class Domain():
                 self.update_H()
                 self.observe()
 
-        return self.return_data()
+        return self.terminate()
 
 
     def update_pml_E(self):
@@ -198,11 +202,17 @@ class Domain():
             if self.it%observer.out_step == 0:
                 observer.call()
 
-    def return_data(self):
+
+    def terminate(self):
+
         out_dico = {}
         for observer in self.observers:
+
             if observer.mode == 'return':
-                out_dico[observer.target] = np.squeeze(np.stack(observer.stack_data))
+                out_dico[observer.target] = observer.terminate()
+            else:
+                observer.terminate()
+
         return out_dico
 
 

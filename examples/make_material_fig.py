@@ -34,7 +34,7 @@ def fth(material, tau, tolerance=0.01):
         dom = Domain()
         dom.add_laser(laser, remove_reflected_part=True)
         dom.add_material(material_sample)
-        dom.add_observer(Observer('rho','return'))
+        dom.add_observer(Returner('rho'))
 
         try: # See comment above near warning stuff.
             rho_max = dom.run(time, progress_bar=False)['rho'].max()
