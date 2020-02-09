@@ -1,7 +1,6 @@
 """
 
 """
-from __future__ import print_function,division
 import numpy as np
 import scipy.constants as c
 import cmath
@@ -289,7 +288,7 @@ class Material():
 
 	def recombination(self):
 		self.rho -= self.domain.dt*self.rho*self.recombination_rate
-		
+
 
 	def get_number_mre_levels(self):
 		return int(get_critical_energy(self.domain.laser.E0, self, self.domain.laser)/(c.hbar*self.domain.laser.omega) + 1)
