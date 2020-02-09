@@ -244,7 +244,7 @@ class Material():
 		self.rho += self.domain.dt*self.fi_rate
 
 		# Energy loss of the field = Energy gain in plasma
-		self.domain.fields['Jfi'] = self.bandgap*self.fi_rate[...,None]*self.domain.fields['E']/(E[...,None]+1.0)**2.0
+		self.domain.fields['Jfi'] = self.bandgap*self.fi_rate[...,None]*self.domain.fields['E']/(E_amp[...,None]+1e-9)**2.0
 
 
 	def impact_ionization(self, E):
@@ -255,8 +255,7 @@ class Material():
 
 	def recombination(self):
 		self.rho -= self.domain.dt*self.rho*self.recombination_rate
-		# self.rho = bd.clip(self.rho, 0, self.density) # Prevent errors?
-
+		
 
 	def get_number_mre_levels(self):
 		return int(get_critical_energy(self.domain.laser.E0, self, self.domain.laser)/(c.hbar*self.domain.laser.omega) + 1)

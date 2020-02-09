@@ -132,8 +132,8 @@ class Observer():
 
 class Watcher(Observer):
 
-    # TODO: loop method
     # TODO: watch back dumped data
+    # TODO: Documentation
 
     def __init__(self, target:str=None, x=None, y=None, z=None, vlim=(0,0), figsize='default', c='C0', colormap='seismic', keep_pml=False, loop=False, out_step=1):
         super(Watcher, self).__init__(target, 'watch', x, y, z, keep_pml, out_step)
@@ -220,6 +220,8 @@ class Watcher(Observer):
 
 class Dumper(Observer):
 
+    # TODO: Documentation
+
     def __init__(self, target:str=None, x=None, y=None, z=None, keep_pml=False, out_step=1):
         super(Dumper, self).__init__(target, 'dump', x, y, z, keep_pml, out_step)
 
@@ -237,6 +239,8 @@ class Dumper(Observer):
 
 class Printer(Observer):
 
+    # TODO: Documentation
+
     def __init__(self, target:str=None, x=None, y=None, z=None, keep_pml=False, out_step=1):
         super(Printer, self).__init__(target, 'print', x, y, z, keep_pml, out_step)
 
@@ -246,6 +250,8 @@ class Printer(Observer):
 
 
 class Returner(Observer):
+
+    # TODO: Documentation
 
     def __init__(self, target:str=None, x=None, y=None, z=None, keep_pml=False, out_step=1):
         super(Returner, self).__init__(target, 'return', x, y, z, keep_pml, out_step)
@@ -373,12 +379,9 @@ class Viewer2d(Viewer):
 
     def update(self, time, data):
         # super(Viewer2d, self).update(time, data)
-        # TODO: slice along the correct axes
         # TODO: Optionnal rotation
 
         # data = np.rot90(data)
-
-        
 
         if self.img is None:
 

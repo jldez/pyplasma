@@ -51,9 +51,7 @@ def example_1D():
 
   dom.add_material(material, boundaries={'xmin':1*um})
 
-  # dom.add_observer(Watcher('Ez', vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=True, out_step=5))
-  dom.add_observer(Watcher('E', keep_pml=True, out_step=5))
-  # dom.add_observer(Watcher('Jb', keep_pml=True, out_step=5))
+  dom.add_observer(Watcher('Ez', vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=True, out_step=5))
   dom.add_observer(Watcher('rho', vlim=(0, material.density), out_step=5))
 
   results = dom.run(time)

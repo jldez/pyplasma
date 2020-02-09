@@ -1,3 +1,5 @@
+
+__author__ = 'Jean-Luc Déziel'
 __version__ = '0.2'
 
 from .backend import backend

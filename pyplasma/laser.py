@@ -9,10 +9,39 @@ import scipy.constants as c
 
 class Laser():
 
-	# FIXME: phase should be True by default
-	# TODO: Documentation
+	"""
+	Defines the laser parameters.
 
-	def __init__(self, wavelength=0, omega=0, phase=False, pulse_duration=np.inf, fluence=0, E0=0, t0=0):
+	Arguments:
+
+		wavelength (float): The wavelength in meters. Have to be specified if omega is not.
+
+		omega (float): The angular frequency in rad/s. Have to be specified if wavelength is not.
+
+		phase (bool): If True, the laser oscillates as normal. If False, oscillations are turned off and
+					  only the amplitude enveloppe is accounted for. Default is True.
+
+		pulse_duration (float): The full width at half maximum (FWHM) in seconds of the gaussian
+								enveloppe of the pulse. Default is infinite, for a continuous laser.
+
+		fluence (float): The fluence is the total energy per surface area of the laser pulse in J/m^2.
+		                 It makes sense only if the pulse_duration is finite. Have to be specified if
+						 E0 is not.
+
+		E0 (float): The amplitude of the electric field in V/m. Have to be specified if fluence is not.
+
+		t0 (float): Time shift in seconds. Default is 0. 
+
+
+	Note: Use laser.E(t) to get the electric field in V/m at time t in seconds.
+
+	"""
+
+	# FIXME: phase is confusing. Should be named something else to represent that it activates the oscillations.
+	#        Then, phase should add a phase.
+	# TODO: add an exponential ramp to 'turn on' the electric field less abruptly in simulations.
+
+	def __init__(self, wavelength=0, omega=0, phase=True, pulse_duration=np.inf, fluence=0, E0=0, t0=0):
 
 		self.wavelength = wavelength
 		self.omega = omega
@@ -42,6 +71,7 @@ class Laser():
 		
 
 	def E(self, t):
+		""" Electric field at time t """
 
 		E = self.E0
 
@@ -62,5 +92,6 @@ class Laser():
 	
 	@property
 	def index_in_domain(self):
+		""" The index at which to apply the electric field source. Propagation only along x axis supported. """
 		return int((self.position - self.domain.x.min())/self.domain.dx)
 

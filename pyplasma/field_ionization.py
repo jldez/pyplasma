@@ -1,7 +1,6 @@
 """
 
 """
-from __future__ import print_function,division
 import numpy as np
 import scipy.constants as c
 from scipy.special import ellipk, ellipe, dawsn
@@ -78,7 +77,6 @@ def fi_rate(E, material, laser, tol=1e-3):
 
 
 
-# TODO : expose N to API, because it is a major bottleneck to be fine tuned
 def fi_table(material, laser, N=1000, tol=1e-4):
 
 	Es = np.logspace(3,np.log10(3*laser.E0),int(N))
