@@ -62,6 +62,18 @@ class Material():
 
 			fi_damping_correction (bool): To use or not a correction factor to Keldsh field ionization
 				that accounts for plasma damping. Default is False.
+
+			fi_mode (str): The calculation mode of field ionization. Default is 'linear' and uses a pre-
+						   calculated table to make linear interpolation, which is faster than calculating
+						   the Keldysh formula every time. However, it requires to be done on the CPU, so
+						   it may slow GPU simulations. For full GPU usage, use the 'nearest' mode, which
+						   is less precise because of the nearest interpolation instead of linear. However, 
+						   this mode is very memory expansive, so use with caution. Finally, the mode
+						   'brute' calculates Keldysh formula at each space and time steps.
+
+			fi_table_size (int): The number of entries in the field ionization table used for interpolation
+								 when fi_mode is 'linear' or 'nearest'. Very memory expensive if fi_mode is
+								 'nearest'. Default is 1000.
 		
 	"""
 
@@ -108,6 +120,14 @@ class Material():
 			self.fi_damping_correction = False
 			if 'fi_damping_correction' in ionization_params:
 				self.fi_damping_correction = ionization_params['fi_damping_correction']
+
+			self.fi_mode = 'linear'
+			if 'fi_mode' in ionization_params:
+				self.fi_mode = ionization_params['fi_mode']
+
+			self.fi_table_size = 1000
+			if 'fi_table_size' in ionization_params:
+				self.fi_table_size = ionization_params['fi_table_size']
 
 			if ionization_params['rate_equation'].lower() in ['fi']:
 				self.rate_equation = 'fi'
@@ -221,21 +241,35 @@ class Material():
 
 
 	def make_fi_table(self, laser):
-		self.fi_table = fi.fi_table(self, laser)
+		self.fi_table = fi.fi_table(self, laser, N=self.fi_table_size)
 
 
-	def field_ionization(self, E):
+	def field_ionization(self, E_amp):
 
-		# # TODO : optionnal use of a fit instead
-		# # FIXME : extremely memory expensive
-		# # Nearest interpolation
-		# diff_squared = (self.fi_table[:,0][None,None,None,:] - E[...,None])**2
-		# ind = bd.argmin(diff_squared, -1)
-		# self.fi_rate = self.fi_table[ind, 1]*self.density
+		# TODO: add fit mode
 
-		E_flat = bd.flatten(E)
-		self.fi_rate = np.interp(bd.numpy(E_flat), bd.numpy(self.fi_table[:,0]), bd.numpy(self.fi_table[:,1]))
-		self.fi_rate = bd.reshape(bd.array(self.fi_rate), E.shape)*self.density
+		if self.fi_mode == 'nearest':
+			diff_squared = (self.fi_table[:,0][None,None,None,:] - E_amp[...,None])**2
+			ind = bd.argmin(diff_squared, -1)
+			self.fi_rate = self.fi_table[ind, 1]*self.density
+
+		elif self.fi_mode == 'linear':
+			E_flat = bd.flatten(E_amp)
+			self.fi_rate = np.interp(bd.numpy(E_flat), bd.numpy(self.fi_table[:,0]), bd.numpy(self.fi_table[:,1]))
+			self.fi_rate = bd.reshape(bd.array(self.fi_rate), E_amp.shape)*self.density
+
+		elif self.fi_mode == 'brute':
+			if self.domain.D > 0:
+				self.fi_rate = bd.zeros(self.domain.grid)
+				for ix in range(self.domain.Nx):
+					for iy in range(self.domain.Ny):
+						for iz in range(self.domain.Nz):
+							self.fi_rate[ix,iy,iz] = fi.fi_rate(E_amp[ix,iy,iz], self, self.domain.laser)*self.density
+			else:
+				self.fi_rate = fi.fi_rate(E_amp, self, self.domain.laser)*self.density
+
+		else:
+			raise ValueError("Invalid field ionization mode. Use 'linear', 'nearest' or 'brute'.")
 
 		# Saturation
 		self.fi_rate *= self.mask*(self.density-self.rho)/self.density

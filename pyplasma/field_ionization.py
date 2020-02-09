@@ -10,6 +10,9 @@ from . import laser as las
 from .backend import backend as bd
 
 
+# TODO: add fit mode for fast keldysh.
+
+
 # Keldysh ionisation
 def fi_rate(E, material, laser, tol=1e-3):
 	"""

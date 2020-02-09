@@ -73,7 +73,7 @@ class Domain():
         self.set_boundaries(time.dt)
 
         for material in self.materials:
-            if material.rate_equation != 'none':
+            if material.rate_equation != 'none' and material.fi_mode != 'brute':
                 material.make_fi_table(self.laser)
 
         if self.D > 0:
