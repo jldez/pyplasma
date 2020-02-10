@@ -1,5 +1,5 @@
-#!/usr/bin/env python
 
+import pyplasma
 import os
 import sys
 try:
@@ -7,13 +7,17 @@ try:
 except ImportError:
     from distutils.core import setup
 
-setup(name="pyplasma",
+with open("README.md", 'r') as file:
+    long_description = file.read()
 
-      version = '0.2',
-      description='Python module for plasma formation modelling.',
-      author='Jean-Luc Déziel',
-      author_email='jean-luc.deziel.1@ulaval.ca',
-      packages=['pyplasma'],
-
+setup(name = pyplasma.__name__,
+      version = pyplasma.__version__,
+      author = pyplasma.__author__,
+      author_email = 'jean-luc.deziel.1@ulaval.ca',
+      url = 'https://github.com/jldez/pyplasma',
+      description = 'Python module for plasma formation modelling.',
+      long_description = long_description,
+      long_description_content_type = 'text/markdown',
+      packages = setuptools.find_packages(),
       install_requires = ['numpy','matplotlib','scipy','tqdm'],
     )

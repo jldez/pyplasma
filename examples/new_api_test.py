@@ -87,5 +87,5 @@ def example_0D():
 
 if __name__ == '__main__':  
   # example_0D()
-  # example_1D()
-  example_3D()
+  example_1D()
+  # example_3D()

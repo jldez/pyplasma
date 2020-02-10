@@ -1,4 +1,5 @@
 
+__name__ = 'pyplasma'
 __author__ = 'Jean-Luc Déziel'
 __version__ = '0.2'
 
