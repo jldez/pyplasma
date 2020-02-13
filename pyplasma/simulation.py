@@ -158,7 +158,7 @@ class Domain():
 
         else:
             # add curl(H)
-            self.fields['E'] += self.dt/self.dx/c.epsilon_0 * curl_H(self.fields['H'])
+            self.fields['E'] += self.dt/c.epsilon_0 * self.curl_H(self.fields['H'])
 
             # add currents
             self.fields['E'] -= self.dt*self.fields['Jb']/c.epsilon_0
@@ -187,7 +187,7 @@ class Domain():
         if self.D > 0:
 
             # add curl(E)
-            self.fields['H'] -= self.dt/self.dx/c.mu_0 * curl_E(self.fields['E'])
+            self.fields['H'] -= self.dt/c.mu_0 * self.curl_E(self.fields['E'])
 
             # add sources
             if self.laser is not None and self.D > 0:
@@ -290,6 +290,36 @@ class Domain():
         return self.dt < self.max_dt
 
 
+    def curl_E(self, E):
+        curl = bd.zeros(E.shape)
+
+        curl[:, :-1, :, 0] += (E[:, 1:, :, 2] - E[:, :-1, :, 2])/self.dy
+        curl[:, :, :-1, 0] -= (E[:, :, 1:, 1] - E[:, :, :-1, 1])/self.dz
+
+        curl[:, :, :-1, 1] += (E[:, :, 1:, 0] - E[:, :, :-1, 0])/self.dz
+        curl[:-1, :, :, 1] -= (E[1:, :, :, 2] - E[:-1, :, :, 2])/self.dx
+
+        curl[:-1, :, :, 2] += (E[1:, :, :, 1] - E[:-1, :, :, 1])/self.dx
+        curl[:, :-1, :, 2] -= (E[:, 1:, :, 0] - E[:, :-1, :, 0])/self.dy
+
+        return curl
+
+
+    def curl_H(self, H):
+        curl = bd.zeros(H.shape)
+
+        curl[:, 1:, :, 0] += (H[:, 1:, :, 2] - H[:, :-1, :, 2])/self.dy
+        curl[:, :, 1:, 0] -= (H[:, :, 1:, 1] - H[:, :, :-1, 1])/self.dz
+
+        curl[:, :, 1:, 1] += (H[:, :, 1:, 0] - H[:, :, :-1, 0])/self.dz
+        curl[1:, :, :, 1] -= (H[1:, :, :, 2] - H[:-1, :, :, 2])/self.dx
+
+        curl[1:, :, :, 2] += (H[1:, :, :, 1] - H[:-1, :, :, 1])/self.dx
+        curl[:, 1:, :, 2] -= (H[:, 1:, :, 0] - H[:, :-1, :, 0])/self.dy
+
+        return curl
+
+
 
 
 class Time():
@@ -301,31 +331,3 @@ class Time():
 
 
 
-def curl_E(E):
-    curl = bd.zeros(E.shape)
-
-    curl[:, :-1, :, 0] += E[:, 1:, :, 2] - E[:, :-1, :, 2]
-    curl[:, :, :-1, 0] -= E[:, :, 1:, 1] - E[:, :, :-1, 1]
-
-    curl[:, :, :-1, 1] += E[:, :, 1:, 0] - E[:, :, :-1, 0]
-    curl[:-1, :, :, 1] -= E[1:, :, :, 2] - E[:-1, :, :, 2]
-
-    curl[:-1, :, :, 2] += E[1:, :, :, 1] - E[:-1, :, :, 1]
-    curl[:, :-1, :, 2] -= E[:, 1:, :, 0] - E[:, :-1, :, 0]
-
-    return curl
-
-
-def curl_H(H):
-    curl = bd.zeros(H.shape)
-
-    curl[:, 1:, :, 0] += H[:, 1:, :, 2] - H[:, :-1, :, 2]
-    curl[:, :, 1:, 0] -= H[:, :, 1:, 1] - H[:, :, :-1, 1]
-
-    curl[:, :, 1:, 1] += H[:, :, 1:, 0] - H[:, :, :-1, 0]
-    curl[1:, :, :, 1] -= H[1:, :, :, 2] - H[:-1, :, :, 2]
-
-    curl[1:, :, :, 2] += H[1:, :, :, 1] - H[:-1, :, :, 1]
-    curl[:, 1:, :, 2] -= H[:, 1:, :, 0] - H[:, :-1, :, 0]
-
-    return curl
