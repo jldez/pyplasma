@@ -1,7 +1,7 @@
 
 __name__ = 'pyplasma'
 __author__ = 'Jean-Luc Déziel'
-__version__ = '0.2'
+__version__ = '0.3'
 
 from .backend import backend
 from .backend import set_backend

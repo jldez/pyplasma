@@ -72,6 +72,7 @@ class NumpyBackend(Backend):
     abs = staticmethod(numpy.abs)
     clip = staticmethod(numpy.clip)
     ceil = staticmethod(numpy.ceil)
+    log = staticmethod(numpy.log)
 
     @staticmethod
     def bmm(arr1, arr2):
@@ -117,6 +118,7 @@ if TORCH_AVAILABLE:
         abs = staticmethod(torch.abs)
         clip = staticmethod(torch.clamp)
         ceil = staticmethod(torch.ceil)
+        log = staticmethod(torch.log)
 
         @staticmethod
         def transpose(arr, axes=None):

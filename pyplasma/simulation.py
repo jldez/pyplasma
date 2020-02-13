@@ -75,6 +75,8 @@ class Domain():
         for material in self.materials:
             if material.rate_equation != 'none' and material.fi_mode != 'brute':
                 material.make_fi_table(self.laser)
+                if material.fi_mode == 'fit':
+                    material.make_fi_fit()
 
         if self.D > 0:
             print(f'Cell size: dx={self.dx/1e-9}nm, dy={self.dy/1e-9}nm, dz:{self.dz/1e-9}nm. Time steps: {self.dt/1e-15}fs/{self.max_dt/1e-15}fs.')

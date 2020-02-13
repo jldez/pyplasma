@@ -242,10 +242,23 @@ class Material():
 	def make_fi_table(self, laser):
 		self.fi_table = fi.fi_table(self, laser, N=self.fi_table_size)
 
+	def make_fi_fit(self, order=5):
+		""" Fit performed on fi_table previously generated """
+		fi_table_numpy = bd.numpy(self.fi_table)
+		self.fi_fit_coefficients = np.polyfit(np.log(fi_table_numpy[:,0]), np.log(fi_table_numpy[:,1]), order)
+		self.fi_fit_coefficients = bd.array(self.fi_fit_coefficients)
+
+		# import matplotlib.pyplot as plt
+		# nu = np.zeros(self.fi_table.shape[0])
+		# for i, c in enumerate(self.fi_fit_coefficients):
+		# 	nu += c*np.log(self.fi_table[:,0])**(order-i)
+		# nu = np.exp(nu)
+		# plt.loglog(self.fi_table[:,0], nu)
+		# plt.loglog(self.fi_table[:,0], self.fi_table[:,1])
+		# plt.show()
+
 
 	def field_ionization(self, E_amp):
-
-		# TODO: add fit mode
 
 		if self.fi_mode == 'nearest':
 			diff_squared = (self.fi_table[:,0][None,None,None,:] - E_amp[...,None])**2
@@ -256,6 +269,13 @@ class Material():
 			E_flat = bd.flatten(E_amp)
 			self.fi_rate = np.interp(bd.numpy(E_flat), bd.numpy(self.fi_table[:,0]), bd.numpy(self.fi_table[:,1]))
 			self.fi_rate = bd.reshape(bd.array(self.fi_rate), E_amp.shape)*self.density
+
+		elif self.fi_mode == 'fit':
+			self.fi_rate = bd.zeros(self.domain.grid)
+			ind = bd.where(E_amp>1e3)
+			for i, c in enumerate(self.fi_fit_coefficients):
+				self.fi_rate[ind] += c*bd.log(E_amp[ind])**(self.fi_fit_coefficients.shape[0]-1-i)
+			self.fi_rate[ind] = bd.exp(self.fi_rate[ind])*self.density
 
 		elif self.fi_mode == 'brute':
 			if self.domain.D > 0:

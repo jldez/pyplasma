@@ -18,6 +18,6 @@ setup(name = pyplasma.__name__,
       description = 'Python module for plasma formation modelling.',
       long_description = long_description,
       long_description_content_type = 'text/markdown',
-      packages = setuptools.find_packages(),
+      packages = ['pyplasma'],
       install_requires = ['numpy','matplotlib','scipy','tqdm'],
     )
