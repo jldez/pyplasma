@@ -41,10 +41,11 @@ class Domain():
         laser.remove_reflected_part = remove_reflected_part
         self.laser = laser
 
-    def add_material(self, material, boundaries:dict={}, roughness=0):
+    def add_material(self, material, boundaries:dict={}):
         # todo : check if overlap?
-        material.place_in_domain(self, boundaries, roughness)
+        material.place_in_domain(self, boundaries)
         self.materials.append(material)
+
 
     def add_observer(self, observer):
         if type(observer) == list:

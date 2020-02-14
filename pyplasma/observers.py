@@ -379,7 +379,7 @@ class Viewer2d(Viewer):
 
     def update(self, time, data):
         # super(Viewer2d, self).update(time, data)
-        # TODO: Optionnal rotation
+        # TODO: Optional rotation
 
         # data = np.rot90(data)
 
