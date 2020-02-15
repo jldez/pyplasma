@@ -4,8 +4,6 @@ set_backend('numpy')
 
 if __name__ == '__main__': 
 
-    time = Time(start=0, end=40*fs, Nt=0.75e3)
-
     dom = Domain(grid=[100], size=[3*um], pml_width=200*nm)
 
     laser = Laser(wavelength=800*nm, pulse_duration=10*fs, fluence=7e4, t0=20*fs, phase=True)
@@ -19,7 +17,7 @@ if __name__ == '__main__':
     dom.add_observer(Watcher('Ez', vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=True, out_step=5))
     dom.add_observer(Watcher('rho', vlim=(0, material.density), out_step=5))
 
-    results = dom.run(time)
+    results = dom.run(40*fs)
 
 
 

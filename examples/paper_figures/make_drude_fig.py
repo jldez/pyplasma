@@ -22,7 +22,6 @@ if __name__ == '__main__':
 
 		mat = Material(index=1, drude_params={'damping':damping, 'm_VB':np.inf, 'rho':3.5e7})
 		las = Laser(omega=1, E0=1, t0=-4.0*c.pi, phase=True)
-		time = Time(-4.0*c.pi, 1.2*c.pi, 1e3)
 
 		dom = Domain()
 		dom.add_laser(las)
@@ -30,11 +29,11 @@ if __name__ == '__main__':
 		dom.add_observer(Returner('Jf'))
 		dom.add_observer(Returner('E'))
 
-		results = dom.run(time, progress_bar=False)
+		results = dom.run((-4.0*c.pi, 1.2*c.pi), Nt=1e3, progress_bar=False)
 		J = results['Jf']
 		E = results['E']
 
-		t, Nt = time.t, time.Nt
+		t, Nt = dom.times, dom.Nt
 		ax.plot(t[int(Nt/2):],E[int(Nt/2):],color="0.5",ls="-",lw=1.5,label=r"$\tilde{E}$")
 		ax.plot(t[int(Nt/2):],J[int(Nt/2):],color=colors[2],ls="-",lw=2,label=r"$\tilde{J}/\omega$")
 		ax.plot(t[int(Nt/2):],J[int(Nt/2):]*E[int(Nt/2):],color="darkred",lw=2,label=r"$\tilde{P}/\omega$")

@@ -6,7 +6,7 @@ __version__ = '0.3.1'
 from .backend import backend
 from .backend import set_backend
 
-from .simulation import Domain, Time
+from .simulation import Domain
 from .laser import Laser
 from .material import Material
 from .observers import *

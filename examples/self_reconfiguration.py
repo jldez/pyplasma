@@ -4,8 +4,6 @@ set_backend('torch.cuda')
 
 if __name__ == '__main__': 
 
-    time = Time(start=0, end=30*fs, Nt=1.2e3)
-
     dom = Domain(grid=[50,128,128], size=[1*um,3*um,3*um], pml_width=200*nm)
 
     laser = Laser(wavelength=800*nm, pulse_duration=10*fs, fluence=7e4, t0=20*fs, phase=True)
@@ -25,4 +23,4 @@ if __name__ == '__main__':
     dom.add_observer(Watcher('E', x=400*nm, vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=True, out_step=10))
     dom.add_observer(Watcher('rho', x=400*nm, vlim=(0,material.density), out_step=10, loop=True))
 
-    results = dom.run(time)
+    results = dom.run(30*fs)

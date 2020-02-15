@@ -25,7 +25,7 @@ if __name__ == '__main__':
     params_dre = {'rate_equation':'dre', 'E0':3.66e9}
     
     time = Time(0, 100*fs, 1000)
-    ratios = {'time':time.t/fs}
+    ratios = {'time':np.linspace(0,100,1000)}
     for params in [params_sre, params_mre, params_dre]:
         mat = Material(index=1.5, drude_params={'damping':1e15}, 
                        ionization_params={'rate_equation':params['rate_equation'],
@@ -38,10 +38,10 @@ if __name__ == '__main__':
         dom.add_observer(Returner('rho'))
         dom.add_observer(Returner('rho_ii'))
         dom.add_observer(Returner('E'))
-        results = dom.run(time, progress_bar=False)
+        results = dom.run(100*fs, Nt=1000, progress_bar=False)
         ratio = results['rho_ii']/results['rho']
         ratios[params['rate_equation']] = ratio
-        fluence = time.dt*c.c*c.epsilon_0*np.sum(np.array(results['E'])**2.)
+        fluence = dom.dt*c.c*c.epsilon_0*np.sum(np.array(results['E'])**2.)
         print(params['rate_equation'] + f': ratio: {ratio.max()}, fluence: {fluence/1e4}')
 
 
@@ -99,7 +99,7 @@ if __name__ == '__main__':
             dom.add_material(mat)
             dom.add_observer(Returner('rho'))
             dom.add_observer(Returner('rho_ii'))
-            results = dom.run(time, progress_bar=False)
+            results = dom.run(100*fs, Nt=1000, progress_bar=False)
             ratios[params['rate_equation']].append((results['rho_ii']/results['rho']).max())
 
 

@@ -23,21 +23,21 @@ warnings.filterwarnings("error")
 def fth(material, tau, tolerance=0.01):
 
     Fmin, Fmax = 0.05, 31 # FIXME: hardcoded limits for minimal and maximal values
-    time = Time(-2*tau, 2*tau, int(10*tau+1000))
+    # time = Time(-2*tau, 2*tau, int(10*tau+1000))
 
     F = 0.75*tau**0.3
     while abs(Fmax-Fmin) > tolerance:
 
         material_sample = copy.deepcopy(material)
 
-        laser = Laser(wavelength=800*nm, pulse_duration=tau, fluence=F*1e4, t0=0)
+        laser = Laser(wavelength=800*nm, pulse_duration=tau, fluence=F*1e4, t0=0, phase=False)
         dom = Domain()
         dom.add_laser(laser, remove_reflected_part=True)
         dom.add_material(material_sample)
         dom.add_observer(Returner('rho'))
 
         try: # See comment above near warning stuff.
-            rho_max = dom.run(time, progress_bar=False)['rho'].max()
+            rho_max = dom.run((-2*tau, 2*tau), Nt=10*tau+1000, progress_bar=False)['rho'].max()
         except: rho_max = material.density
 
         threshold = c.epsilon_0*material.m_red*c.m_e/c.e**2*material.index**2*(laser.omega**2+material.damping**2)

@@ -134,6 +134,7 @@ class Watcher(Observer):
 
     # TODO: watch back dumped data
     # TODO: Documentation
+    # TODO: Log graphs
 
     def __init__(self, target:str=None, x=None, y=None, z=None, vlim=(0,0), figsize='default', c='C0', colormap='seismic', keep_pml=False, loop=False, out_step=1):
         super(Watcher, self).__init__(target, 'watch', x, y, z, keep_pml, out_step)
@@ -419,6 +420,8 @@ class Viewer2d(Viewer):
 
 
 def format_axis(ax, mode='length'):
+
+    # TODO: use the format value function in misc.py
 
     axis = copy.deepcopy(ax)
     max_value = max([abs(axis.max()), abs(axis.min())])

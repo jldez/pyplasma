@@ -83,9 +83,6 @@ def fi_table(material, laser, N=1000, tol=1e-4):
 	Es = np.logspace(3,np.log10(3*laser.E0),int(N))
 	table = bd.zeros((N,2))
 
-	if material.domain.progress_bar:
-		Es = tqdm.tqdm(Es, 'Pre-calculate FI table')
-
 	for i, E in enumerate(Es):
 		rate = fi_rate(E, material, laser, tol=tol)
 		table[i,0] = E

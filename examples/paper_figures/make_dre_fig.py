@@ -22,12 +22,11 @@ if __name__ == '__main__':
 	lw=2
 
 	params_abc = [10*fs, 1.6e4, 2000]
-	params_def = [300e-15, 4.8e4, 10000]
+	params_def = [300*fs, 4.8e4, 10000]
 
 	for i, params in enumerate([params_abc, params_def]):
 
 		tau, fluence, Nt = params
-		time = Time(-2*tau, 2*tau, Nt)
 		mat = Material(index=1.5, drude_params={'damping':1e15}, ionization_params={'rate_equation':'dre','bandgap':9*eV,'density':2e28,'cross_section':1e-19})
 		las = Laser(wavelength=800*nm, pulse_duration=tau, fluence=fluence, t0=0, phase=False)
 		dom = Domain()
@@ -37,15 +36,15 @@ if __name__ == '__main__':
 		for target in ['rho','xi_e','rho_fi','rho_ii','Ekin','E','coll_freq_en','el_heating_rate']:
 			dom.add_observer(Returner(target))
 
-		results = dom.run(time)
-		time.t /= fs
+		results = dom.run((-2*tau,2*tau), Nt=Nt)
+		t_axis = dom.times/fs
 
 		# Plasma density
 		ax = fig.add_subplot(3,2,1+i)
-		ax.semilogy(time.t, results['rho']/mat.density, label=r"$\rho$", color=colors[2], lw=lw)
-		ax.semilogy(time.t, results["rho"]*results["xi_e"]/mat.density, label=r"$\xi^e\rho$", color="darkred", lw=lw)
-		ax.semilogy(time.t, results["rho_fi"]/mat.density, color="k", ls="--", label=r"$\rho_{\mathrm{fi}}$", lw=lw)
-		ax.semilogy(time.t, results["rho_ii"]/mat.density, color="k", ls=":", label=r"$\rho_{\mathrm{ii}}$", lw=lw)
+		ax.semilogy(t_axis, results['rho']/mat.density, label=r"$\rho$", color=colors[2], lw=lw)
+		ax.semilogy(t_axis, results["rho"]*results["xi_e"]/mat.density, label=r"$\xi^e\rho$", color="darkred", lw=lw)
+		ax.semilogy(t_axis, results["rho_fi"]/mat.density, color="k", ls="--", label=r"$\rho_{\mathrm{fi}}$", lw=lw)
+		ax.semilogy(t_axis, results["rho_ii"]/mat.density, color="k", ls=":", label=r"$\rho_{\mathrm{ii}}$", lw=lw)
 		plt.ylim(1e-8, 1e0)
 		plt.setp(ax.get_xticklabels(), visible=False)
 		if i == 0:
@@ -58,15 +57,15 @@ if __name__ == '__main__':
 			plt.text(-13.1*42.9,2e-1,r"$\mathrm{(d)}$")
 		ax.yaxis.set_ticks_position('both')
 		ax.yaxis.set_ticks([1e-8, 1e-6, 1e-4, 1e-2, 1e0])
-		plt.xlim(time.t.min(), time.t.max())
+		plt.xlim(t_axis.min(), t_axis.max())
 
 		# Temperature of the electrons
 		ax2 = fig.add_subplot(3,2,3+i)
 		Fermi_energy = c.hbar**2*(3*c.pi**2*results["rho"])**(2/3)/(2*c.m_e)
 		Ekinmax = el_Ekin_max(results['E'].max(), mat, las)
-		ax2.semilogy(time.t, results["Ekin"]/eV, color=colors[2], label=r"$\mathcal{E}^e_\mathrm{k}$", lw=lw)
-		ax2.semilogy(time.t, Fermi_energy/eV, label=r"$\mathcal{E}_F$", color="darkred", ls="-", lw=lw)
-		ax2.semilogy(time.t, Ekinmax*np.ones(Nt)/eV, color="k",ls="--", label="limit", lw=lw)
+		ax2.semilogy(t_axis, results["Ekin"]/eV, color=colors[2], label=r"$\mathcal{E}^e_\mathrm{k}$", lw=lw)
+		ax2.semilogy(t_axis, Fermi_energy/eV, label=r"$\mathcal{E}_F$", color="darkred", ls="-", lw=lw)
+		ax2.semilogy(t_axis, Ekinmax*np.ones(Nt)/eV, color="k",ls="--", label="limit", lw=lw)
 		plt.ylim(0.01,30)
 		plt.setp(ax2.get_xticklabels(),visible=False)
 		if i == 0:
@@ -78,13 +77,13 @@ if __name__ == '__main__':
 			ax2.yaxis.tick_right()
 			plt.text(-13.1*42.9, 15, r"$\mathrm{(e)}$")
 		ax2.yaxis.set_ticks_position('both')
-		plt.xlim(time.t.min(),time.t.max())
+		plt.xlim(t_axis.min(),t_axis.max())
 
 		# Collision rates
 		ax3 = fig.add_subplot(3,2,5+i)
-		plt.semilogy(time.t, results["coll_freq_en"]*fs, label=r"$\gamma_{n}^e$", color=colors[2], lw=lw)
-		plt.semilogy(time.t, results["el_heating_rate"]*fs, label=r"$\gamma_\mathrm{ib}^e$", color="darkred", lw=lw)
-		plt.semilogy(time.t, ee_coll_freq(results['Ekin'], mat)*1e-15, label=r"$\gamma_{e}^e$", color="k", ls="--", lw=lw)
+		plt.semilogy(t_axis, results["coll_freq_en"]*fs, label=r"$\gamma_{n}^e$", color=colors[2], lw=lw)
+		plt.semilogy(t_axis, results["el_heating_rate"]*fs, label=r"$\gamma_\mathrm{ib}^e$", color="darkred", lw=lw)
+		plt.semilogy(t_axis, ee_coll_freq(results['Ekin'], mat)*1e-15, label=r"$\gamma_{e}^e$", color="k", ls="--", lw=lw)
 		plt.ylim(5e-7, 50)
 		if i == 0:
 			plt.ylabel(r"$\mathrm{Frequency~[fs}^{-1}]$")
@@ -97,7 +96,7 @@ if __name__ == '__main__':
 		plt.xlabel(r"$t~[\mathrm{fs}]$")
 		ax3.yaxis.set_ticks_position('both')
 		ax3.yaxis.set_ticks([1e-6, 1e-4, 1e-2, 1e0])
-		plt.xlim(time.t.min(), time.t.max())
+		plt.xlim(t_axis.min(), t_axis.max())
 
 		if i == 1:
 			ax.xaxis.set_ticks([-500,-250,0,250,500])

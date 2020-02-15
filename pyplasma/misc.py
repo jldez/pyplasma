@@ -4,6 +4,7 @@
 import numpy as np
 import scipy.constants as c
 import matplotlib.pyplot as plt
+import copy
 
 
 
@@ -157,3 +158,32 @@ def closest_divisor(N, m):
 
     return C
 
+
+
+def format_value(value, base_unit='m'):
+
+    f_value = copy.deepcopy(value)
+    factor, units = 1, ''
+
+    if value < 1 and value >= 1e-3:
+        f_value *= 1e3
+        factor, units = 1e-3, 'm'
+    if value < 1e-3 and value >= 1e-6:
+        f_value *= 1e6
+        factor, units = 1e-6, r'$\mu$'
+    if value < 1e-6 and value >= 1e-9:
+        f_value *= 1e9
+        factor, units = 1e-9, 'n'
+    if value < 1e-9 and value >= 1e-12:
+        f_value *= 1e12
+        factor, units = 1e-12, 'p'
+    if value < 1e-12 and value >= 1e-15:
+        f_value *= 1e15
+        factor, units = 1e-15, 'f'
+    if value < 1e-15:
+        f_value *= 1e18
+        factor, units = 1e-18, 'a'
+
+    units += base_unit
+
+    return f_value, factor, units

@@ -8,7 +8,7 @@ import copy
 import matplotlib.pyplot as plt
 
 from .boundaries import *
-
+from .misc import format_value
 from .backend import backend as bd
 
 
@@ -42,9 +42,18 @@ class Domain():
         self.laser = laser
 
     def add_material(self, material, boundaries:dict={}):
-        # todo : check if overlap?
+        # TODO: check if overlap
         material.place_in_domain(self, boundaries)
         self.materials.append(material)
+
+        if material.rate_equation != 'none' and material.fi_mode != 'brute':
+
+            if not hasattr(self, 'laser'):
+                raise ValueError('A laser must be attached first in order to add an ionizable material.')
+
+            material.make_fi_table(self.laser)
+            if material.fi_mode == 'fit':
+                material.make_fi_fit()
 
 
     def add_observer(self, observer):
@@ -61,29 +70,39 @@ class Domain():
             self.fields[field] = bd.zeros(self.field_shape)
 
 
-    def run(self, time, progress_bar:bool=True):
-        self.times = time.t
-        self.dt = time.dt
-        self.progress_bar = progress_bar
+    def run(self, time, stability_factor:float=0.95, Nt:int='auto', progress_bar:bool=True):            
 
-        if self.progress_bar:
-            self.tqdm_times = tqdm.tqdm(time.t, 'Running')
+        
+
+        if type(time) == tuple:
+            self.start_time = time[0]
+            self.end_time = time[1]
         else:
-            self.tqdm_times = time.t
+            self.start_time = 0
+            self.end_time = time
 
-        self.set_boundaries(time.dt)
-
-        for material in self.materials:
-            if material.rate_equation != 'none' and material.fi_mode != 'brute':
-                material.make_fi_table(self.laser)
-                if material.fi_mode == 'fit':
-                    material.make_fi_fit()
+        self.Lt = self.end_time - self.start_time
+        if Nt == 'auto':
+            self.dt = stability_factor*self.max_dt
+            self.Nt = int(np.ceil(self.Lt/self.dt))
+        else:
+            self.Nt = int(Nt)
+            self.dt = self.Lt/self.Nt
+        self.times = np.linspace(self.start_time, self.end_time, self.Nt)
 
         if self.D > 0:
-            print(f'Cell size: dx={self.dx/1e-9}nm, dy={self.dy/1e-9}nm, dz:{self.dz/1e-9}nm. Time steps: {self.dt/1e-15}fs/{self.max_dt/1e-15}fs.')
+            fdx, fdy, fdz = [format_value(d,'m') for d in [self.dx, self.dy, self.dz]]
+            print(f'Space discretization: dx={fdx[0]:.1f}{fdx[2]}, dy={fdy[0]:.1f}{fdy[2]}, dz:{fdz[0]:.1f}{fdz[2]}.')
+            fdt = format_value(self.dt,'s')
+            print(f'Time discretization: dt={fdt[0]:.1f}{fdt[2]}.')
 
-        if self.D > 0 and not self.is_stable:
-            print(f'Warning. Stability compromised by time steps too large by a factor: {self.dt/self.max_dt}.')
+        self.set_boundaries(self.dt)
+
+        self.progress_bar = progress_bar
+        if self.progress_bar:
+            self.tqdm_times = tqdm.tqdm(self.times, 'Running')
+        else:
+            self.tqdm_times = self.times
 
         for self.it, self.t in enumerate(self.tqdm_times):
 
@@ -261,9 +280,9 @@ class Domain():
             self.Lx, self.Ly, self.Lz = self.size
             self.dx, self.dy, self.dz = self.Lx/self.Nx, self.Ly/self.Ny, self.Lz/self.Nz
 
-        self.x = bd.linspace(0,self.Lx, self.Nx)
-        self.y = bd.linspace(0,self.Ly, self.Ny)
-        self.z = bd.linspace(0,self.Lz, self.Nz)
+        self.x = bd.linspace(0, self.Lx, self.Nx)
+        self.y = bd.linspace(0, self.Ly, self.Ny)
+        self.z = bd.linspace(0, self.Lz, self.Nz)
 
         self.field_shape = (self.Nx, self.Ny, self.Nz, 3)
 
@@ -285,10 +304,6 @@ class Domain():
         delta = min([self.dx, self.dy, self.dz])
         index_max = max([1]+[material.index for material in self.materials])
         return  delta / (self.D**0.5 * c.c * index_max)
-
-    @property
-    def is_stable(self):
-        return self.dt < self.max_dt
 
 
     def curl_E(self, E):
@@ -323,12 +338,12 @@ class Domain():
 
 
 
-class Time():
+# class Time():
 
-    def __init__(self, start, end, Nt):
-        self.t = np.linspace(start, end, int(Nt))
-        self.dt = self.t[1] - self.t[0]
-        self.Nt = Nt
+#     def __init__(self, start, end, Nt):
+#         self.t = np.linspace(start, end, int(Nt))
+#         self.dt = self.t[1] - self.t[0]
+#         self.Nt = Nt
 
 
 
