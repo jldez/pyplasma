@@ -1,0 +1,37 @@
+To do list.
+
+***General***
+API description in readme file
+
+***Time***
+Change how time is handled. When calling Domain.run(), have the total time as argument and automatic time steps. Plus, optional factor for dt.
+
+***Boundaries***
+PMLs along y and z axes.
+
+***Lasers***
+Laser source on any boundary. Choose polarization axis.
+Exponential ramp to "turn on" the laser source at simulation start.
+Phase parameter should actually be a phase. Find other name for toggling on/off the oscillations.
+
+***Materials***
+Self-trapping
+Incubation
+Validate medium mask float values along y and z working properly
+Move out ionization stuff
+Fluence thresold finder
+Volume inhomogeneities
+
+***Observers***
+Watcher should show actual material mask
+Loop over multiple watchers
+Dump and watch back dumped data
+Watcher out_step automatic to reduce slow downs
+Returner fail safe for memory
+Watcher in Fourier domain
+
+
+
+***Far Future***
+Alternatives to Drude model
+Dynamic collision rates
