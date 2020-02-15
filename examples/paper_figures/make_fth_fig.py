@@ -23,7 +23,6 @@ warnings.filterwarnings("error")
 def fth(material, tau, tolerance=0.01):
 
     Fmin, Fmax = 0.05, 31 # FIXME: hardcoded limits for minimal and maximal values
-    # time = Time(-2*tau, 2*tau, int(10*tau+1000))
 
     F = 0.75*tau**0.3
     while abs(Fmax-Fmin) > tolerance:

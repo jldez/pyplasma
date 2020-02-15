@@ -37,7 +37,7 @@ class Periodic(Boundary):
         if self.boundary == 'y':
             self.domain.fields['E'][:, 0, :, :] = self.domain.fields['E'][:, -1, :, :]
         if self.boundary == 'z':
-            self.domain.fields['E'][:, :, 0, :] = self.domain.fields['E'][:, :, -1, :]
+            self.domain.fields['E'][:, :, 0, :] = self.domain.fields['E'][:, :, -1, :]            
 
     def update_H(self):
         if self.boundary == 'x':

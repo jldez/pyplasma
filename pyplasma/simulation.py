@@ -33,12 +33,13 @@ class Domain():
         self.initialize_fields()
 
     
-    def add_laser(self, laser, source_mode='TFSF', position='default', remove_reflected_part=False):
+    def add_laser(self, laser, source_mode='TFSF', position='default', remove_reflected_part=False, ramp:bool=False):
         # TODO: polarization axis
         laser.domain = self
         laser.source_mode = source_mode
         laser.position = self.pml_width if position == 'default' else position
         laser.remove_reflected_part = remove_reflected_part
+        self.laser_ramp = ramp
         self.laser = laser
 
     def add_material(self, material, boundaries:dict={}):
@@ -71,8 +72,6 @@ class Domain():
 
 
     def run(self, time, stability_factor:float=0.95, Nt:int='auto', progress_bar:bool=True):            
-
-        
 
         if type(time) == tuple:
             self.start_time = time[0]
@@ -191,10 +190,16 @@ class Domain():
             # Section 3.10 of : https://www.eecs.wsu.edu/~schneidj/ufdtd/chap3.pdf
             if self.laser is not None:
                 laser_E = self.laser.E(self.t)
+
+                if self.laser_ramp:
+                    ramp = (bd.exp((self.it/5)**2)-1)/bd.exp((self.it/5)**2) if self.it < 20 else 1
+                else:
+                    ramp = 1
+
                 if self.laser.source_mode.lower() == 'tfsf':
-                    self.fields['E'][self.laser.index_in_domain,...,2] += self.dt/(c.epsilon_0*self.dx)*laser_E/(120*c.pi)
+                    self.fields['E'][self.laser.index_in_domain,...,2] += ramp*self.dt/(c.epsilon_0*self.dx)*laser_E/(120*c.pi)
                 elif self.laser.source_mode.lower() == 'hard':
-                    self.fields['E'][self.laser.index_in_domain,...,2] = laser_E
+                    self.fields['E'][self.laser.index_in_domain,...,2] = ramp*laser_E
 
             # boundaries
             for boundary in self.boundaries:
@@ -297,13 +302,11 @@ class Domain():
             self.nb_pml = int(self.pml_width/self.dx)
             self.boundaries = [PML(self, 'xmin', dt), PML(self, 'xmax', dt)]
             self.boundaries += [Periodic(self, 'y'), Periodic(self, 'z')]
-
+        
 
     @property
     def max_dt(self):
-        delta = min([self.dx, self.dy, self.dz])
-        index_max = max([1]+[material.index for material in self.materials])
-        return  delta / (self.D**0.5 * c.c * index_max)
+        return 1/(c.c*(1/self.dx**2 + 1/self.dy**2 + 1/self.dz**2)**0.5)
 
 
     def curl_E(self, E):

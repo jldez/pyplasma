@@ -4,14 +4,14 @@ To do list.
 API description in readme file
 
 ***Time***
-Change how time is handled. When calling Domain.run(), have the total time as argument and automatic time steps. Plus, optional factor for dt.
+Done - Change how time is handled. When calling Domain.run(), have the total time as argument and automatic time steps. Plus, optional factor for dt.
 
 ***Boundaries***
 PMLs along y and z axes.
 
 ***Lasers***
 Laser source on any boundary. Choose polarization axis.
-Exponential ramp to "turn on" the laser source at simulation start.
+Done - Exponential ramp to "turn on" the laser source at simulation start.
 Phase parameter should actually be a phase. Find other name for toggling on/off the oscillations.
 
 ***Materials***

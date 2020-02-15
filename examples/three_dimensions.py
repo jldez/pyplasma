@@ -19,9 +19,8 @@ if __name__ == '__main__':
 
     dom.add_material(material, boundaries={'xmin':1*um,'xmax':2*um})
 
-    dom.add_observer(Watcher('Ez', z=1.5*um, vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=False, out_step=10))
-    dom.add_observer(Watcher('rho', z=1.5*um, vlim=(0, material.density), keep_pml=False, out_step=10))
-    dom.add_observer(Watcher('Ez', y=1.5*um, z=1.5*um, vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=True, out_step=10))
-    dom.add_observer(Watcher('rho', y=1.5*um, z=1.5*um, vlim=(0, material.density), keep_pml=True, out_step=10))
+    dom.add_observer(Watcher('Ez', z=1.5*um, vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=False, out_step=5))
+    dom.add_observer(Watcher('Ez', y=1.5*um, z=1.5*um, vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=True, out_step=5))
+    dom.add_observer(Watcher('rho', y=1.5*um, z=1.5*um, vlim=(0, material.density), keep_pml=True, out_step=5))
 
     results = dom.run(40*fs)
