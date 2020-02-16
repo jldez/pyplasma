@@ -112,7 +112,27 @@ The `drude_params` arguments takes a dictionary. The plasma damping is set with 
 
 #### Ionization
 
-.
+Plasma formation is activated by adding the `ionization_params` argument when creating the `Material` instance:
+
+```python
+material = Material(index=1.45, resonance=120*nm, drude_params={'damping':1e15},
+                    ionization_params={'rate_equation':'dre','bandgap':9*eV,'density':2e28,'cross_section':1e-19})
+```
+
+The `rate_equation` key is used to set the ionization model. It can be set to 
+
+* `fi` for field ionization (Keldysh) only
+* `sre` for the single rate equation model (the key `alpha_sre` is then necessary to set the impact ionization rate in m^2/J)
+* `mre` for the multiple rate equations model (the key `cross_section` is then necessary to set the carrier-neutral collisional cross-section in 1/m^2)
+* `dre` for the delayed rate equations model (the key `cross_section` is then necessary to set the carrier-neutral collisional cross-section in 1/m^2)
+
+For all cases, the `bandgap` (in J) and the molecular `density` (in 1/m^3) of the material has to be indicated. The plasma density will saturate at `density`, as only single ionization per molecule is accounted for (for now).
+
+recombination
+
+An optional correction to the Keldysh model to account for plasma damping can be toggle on with the key `fi_damping_correction` set to `True`. This is unpublished work and should be kept off while it is still under investigation. Or be stolen and published by anyone, be my guest!
+
+The Keldysh field ionization model is extremely computationaly expansive. While it can be calculated by brute force at every FDTD grid cells and time steps with `fi_mode` key set to `brute`, it is not reasonable. By default, the `fi_mode` is set to `linear`, which will pre-calculate an interpolation table and perform linear interpolation instead. The size of the table is set with the `fi_table_size` key (default is 1000) and will work for electric field amplitudes between 10^3 V/m and 3*E0 (E0 is the peak amplitude of the laser). However, the linear interpolation is performed using the CPU and may cause a speed bottleneck for GPU calculations. It becomes less of a problem for large 3D grids, as the rest of the calculations catch up in computationnal cost. For small grids, CPU is prefered anyway, but for medium grid sizes, one may want to try to set `fi_mode` to `nearest`. This is less accurate, but fully works on GPU. However, it is extremely memory expansive and the `fi_table_size` will probably have to be reduced considerably (which hurts accuracy even more). Finaly, to fix all these issues at the cost of approximating the Keldysh model to a polynomial fit, the `fi_mode` can be set to `fit`, which is quite fast, memory efficient and also works on GPU.
 
 ## Authors
 
