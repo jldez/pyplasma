@@ -1,7 +1,6 @@
 To do list.
 
 ***General***
-API description in readme file
 
 ***Boundaries***
 PMLs along y and z axes.

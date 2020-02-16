@@ -121,10 +121,10 @@ material = Material(index=1.45, resonance=120*nm, drude_params={'damping':1e15},
 
 The `rate_equation` key is used to set the ionization model. It can be set to 
 
-* `fi` for field ionization (Keldysh) only
-* `sre` for the single rate equation model (the key `alpha_sre` is then necessary to set the impact ionization rate in m^2/J)
-* `mre` for the multiple rate equations model (the key `cross_section` is then necessary to set the carrier-neutral collisional cross-section in 1/m^2)
-* `dre` for the delayed rate equations model (the key `cross_section` is then necessary to set the carrier-neutral collisional cross-section in 1/m^2)
+- `fi` for field ionization (Keldysh) only
+- `sre` for the single rate equation model (the key `alpha_sre` is then necessary to set the impact ionization rate in m^2/J)
+- `mre` for the multiple rate equations model (the key `cross_section` is then necessary to set the carrier-neutral collisional cross-section in 1/m^2)
+- `dre` for the delayed rate equations model (the key `cross_section` is then necessary to set the carrier-neutral collisional cross-section in 1/m^2)
 
 For all cases, the `bandgap` (in J) and the molecular `density` (in 1/m^3) of the material has to be indicated. The plasma density will saturate at `density`, as only single ionization per molecule is accounted for (for now).
 
@@ -154,9 +154,9 @@ surface_roughness(material, boundary='xmin', amplitude=20*nm, noise='fractal', f
 
 The `amplitude` is the maximum thickness added to the surface. The roughness is generated from a random 2D map (that can be visualized at the start of the simulation with `show` set to `True`). The randomness of that map can be tuned with the `noise` argument set to 
 
-* `white` for a random height between 0 and `amplitude` at each grid cell
-* `perlin` for Perlin noise, for which the characteristic bump sizes is set with `feature_size`
-* `fractal` for layered Perlin noise maps, for which the characteristic bump sizes is set with `feature_size`
+- `white` for a random height between 0 and `amplitude` at each grid cell
+- `perlin` for Perlin noise, for which the characteristic bump sizes is set with `feature_size`
+- `fractal` for layered Perlin noise maps, for which the characteristic bump sizes is set with `feature_size`
 
 ### Data extraction from simulations
 
@@ -172,8 +172,3 @@ dom.run(15*fs)
 
 The total time of the simulation is the only required argument. The time steps are automatically set, but stability can be compromised by various elements added to the simulation. If stability issues occur, the time steps can be reduced with the argument `stability_factor` that multiplies the time steps (default is 0.95).
 
-## Authors
-
-* **Jean-Luc Déziel**
-* **Charles Varin**
-* **Louis J. Dubé**
