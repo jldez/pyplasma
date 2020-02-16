@@ -6,8 +6,8 @@ if __name__ == '__main__':
 
     dom = Domain(grid=[50,128,128], size=[1*um,3*um,3*um], pml_width=200*nm)
 
-    laser = Laser(wavelength=800*nm, pulse_duration=10*fs, fluence=7e4, t0=20*fs, phase=True)
-    dom.add_laser(laser, position='default', source_mode='tfsf')
+    laser = Laser(wavelength=800*nm, pulse_duration=10*fs, fluence=7e4, t0=10*fs, phase=True)
+    dom.add_laser(laser, position='default', source_mode='tfsf', ramp=True)
 
     material = Material(
                         index=1.45, resonance=120e-9, chi3=2e-22,
@@ -23,4 +23,4 @@ if __name__ == '__main__':
     dom.add_observer(Watcher('E', x=400*nm, vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=True, out_step=10))
     dom.add_observer(Watcher('rho', x=400*nm, vlim=(0,material.density), out_step=10, loop=True))
 
-    results = dom.run(30*fs, stability_factor=0.9)
+    results = dom.run(15*fs, stability_factor=0.9)

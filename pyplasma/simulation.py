@@ -191,10 +191,7 @@ class Domain():
             if self.laser is not None:
                 laser_E = self.laser.E(self.t)
 
-                if self.laser_ramp:
-                    ramp = (bd.exp((self.it/5)**2)-1)/bd.exp((self.it/5)**2) if self.it < 20 else 1
-                else:
-                    ramp = 1
+                ramp = (np.exp((self.it/10)**2)-1)/np.exp((self.it/10)**2) if self.laser_ramp and self.it < 30 else 1
 
                 if self.laser.source_mode.lower() == 'tfsf':
                     self.fields['E'][self.laser.index_in_domain,...,2] += ramp*self.dt/(c.epsilon_0*self.dx)*laser_E/(120*c.pi)
@@ -217,8 +214,11 @@ class Domain():
             # add sources
             if self.laser is not None and self.D > 0:
                 laser_E = self.laser.E(self.t)
+
+                ramp = (np.exp((self.it/10)**2)-1)/np.exp((self.it/10)**2) if self.laser_ramp and self.it < 30 else 1
+
                 if self.laser.source_mode.lower() == 'tfsf':
-                    self.fields['H'][self.laser.index_in_domain,...,1] -= self.dt/(c.mu_0*self.dx)*laser_E
+                    self.fields['H'][self.laser.index_in_domain,...,1] -= ramp*self.dt/(c.mu_0*self.dx)*laser_E
                 elif self.laser.source_mode.lower() == 'hard':
                     pass
 

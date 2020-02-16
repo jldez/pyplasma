@@ -54,6 +54,7 @@ class Laser():
 		self.phase = phase
 		self.pulse_duration = pulse_duration
 		self.remove_reflected_part = False
+		self.ramp = False
 
 		self.E0 = E0
 		self.fluence = fluence
