@@ -136,7 +136,7 @@ The Keldysh field ionization model is extremely computationaly expansive. While 
 
 #### Add material to the simulation
 
-The material instance just created is added to the simulation with
+The material instance just created is added to the simulation (after adding the laser source to the domain) with
 
 ```python
 dom.add_material(material, boundaries={'xmin':300*nm})
@@ -146,7 +146,7 @@ If the domain is 1+ dimensions, the material is added everywhere, unless `bounda
 
 #### Surface roughness
 
-To add surface roughness to the `xmin` boundary (other boundaries not possible yet), use
+To add surface roughness to the `xmin` boundary (other boundaries not possible yet), use (after adding material to the domain)
 
 ```python
 surface_roughness(material, boundary='xmin', amplitude=20*nm, noise='fractal', feature_size=100*nm, show=True)
@@ -157,6 +157,20 @@ The `amplitude` is the maximum thickness added to the surface. The roughness is 
 * `white` for a random height between 0 and `amplitude` at each grid cell
 * `perlin` for Perlin noise, for which the characteristic bump sizes is set with `feature_size`
 * `fractal` for layered Perlin noise maps, for which the characteristic bump sizes is set with `feature_size`
+
+### Data extraction from simulations
+
+Under contruction. The API is in its early phase and will ultimately change. However, one can play around with what is available based upon the examples.
+
+### Run simulation
+
+The simulation is ran using
+
+```python
+dom.run(15*fs)
+```
+
+The total time of the simulation is the only required argument. The time steps are automatically set, but stability can be compromised by various elements added to the simulation. If stability issues occur, the time steps can be reduced with the argument `stability_factor` that multiplies the time steps (default is 0.95).
 
 ## Authors
 
