@@ -128,11 +128,35 @@ The `rate_equation` key is used to set the ionization model. It can be set to
 
 For all cases, the `bandgap` (in J) and the molecular `density` (in 1/m^3) of the material has to be indicated. The plasma density will saturate at `density`, as only single ionization per molecule is accounted for (for now).
 
-recombination
+A electron-hole pair recombination rate can be set with the `recombination_rate` key.
 
 An optional correction to the Keldysh model to account for plasma damping can be toggle on with the key `fi_damping_correction` set to `True`. This is unpublished work and should be kept off while it is still under investigation. Or be stolen and published by anyone, be my guest!
 
 The Keldysh field ionization model is extremely computationaly expansive. While it can be calculated by brute force at every FDTD grid cells and time steps with `fi_mode` key set to `brute`, it is not reasonable. By default, the `fi_mode` is set to `linear`, which will pre-calculate an interpolation table and perform linear interpolation instead. The size of the table is set with the `fi_table_size` key (default is 1000) and will work for electric field amplitudes between 10^3 V/m and 3*E0 (E0 is the peak amplitude of the laser). However, the linear interpolation is performed using the CPU and may cause a speed bottleneck for GPU calculations. It becomes less of a problem for large 3D grids, as the rest of the calculations catch up in computationnal cost. For small grids, CPU is prefered anyway, but for medium grid sizes, one may want to try to set `fi_mode` to `nearest`. This is less accurate, but fully works on GPU. However, it is extremely memory expansive and the `fi_table_size` will probably have to be reduced considerably (which hurts accuracy even more). Finaly, to fix all these issues at the cost of approximating the Keldysh model to a polynomial fit, the `fi_mode` can be set to `fit`, which is quite fast, memory efficient and also works on GPU.
+
+#### Add material to the simulation
+
+The material instance just created is added to the simulation with
+
+```python
+dom.add_material(material, boundaries={'xmin':300*nm})
+```
+
+If the domain is 1+ dimensions, the material is added everywhere, unless `boundaries` are specified with the keys `xmin`, `xmax`, `ymin`, `ymax`, `zmin` and `zmax`.
+
+#### Surface roughness
+
+To add surface roughness to the `xmin` boundary (other boundaries not possible yet), use
+
+```python
+surface_roughness(material, boundary='xmin', amplitude=20*nm, noise='fractal', feature_size=100*nm, show=True)
+```
+
+The `amplitude` is the maximum thickness added to the surface. The roughness is generated from a random 2D map (that can be visualized at the start of the simulation with `show` set to `True`). The randomness of that map can be tuned with the `noise` argument set to 
+
+* `white` for a random height between 0 and `amplitude` at each grid cell
+* `perlin` for Perlin noise, for which the characteristic bump sizes is set with `feature_size`
+* `fractal` for layered Perlin noise maps, for which the characteristic bump sizes is set with `feature_size`
 
 ## Authors
 
