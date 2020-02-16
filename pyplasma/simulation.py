@@ -150,7 +150,7 @@ class Domain():
 
 
     def update_bounded_current(self):
-        # TODO: Add reference to Varin's model
+        # See https://arxiv.org/abs/1603.09410
         for material in self.materials:
             w0 = 2*c.pi*c.c/material.resonance if material.resonance > 0 else 0
             P = c.epsilon_0*((material.index**2 - 1)*self.fields['E'] + 
