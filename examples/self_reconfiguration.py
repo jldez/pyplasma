@@ -9,8 +9,7 @@ if __name__ == '__main__':
     laser = Laser(wavelength=800*nm, pulse_duration=10*fs, fluence=7e4, t0=10*fs, phase=True)
     dom.add_laser(laser, position='default', source_mode='tfsf', ramp=True)
 
-    material = Material(
-                        index=1.45, resonance=120e-9, chi3=2e-22,
+    material = Material(index=1.45, resonance=120e-9, chi3=2e-22,
                         drude_params={'damping':1e15},
                         ionization_params={'rate_equation':'sre','bandgap':9.*c.e,'density':2.2e28,'alpha_sre':0.001}
                         # ionization_params={'rate_equation':'mre','bandgap':9.*c.e,'density':2e28,'cross_section':1e-19}
