@@ -103,7 +103,10 @@ class Material():
             else: 
                 self.m_red = self.m_CB
             if 'rho' in drude_params:
-                self.rho = drude_params['rho']
+                if type(drude_params['rho']) in [int, float]:
+                    self.rho = drude_params['rho']
+                else: 
+                    self.rho = bd.array(drude_params['rho'])
             
         if ionization_params == {}:
             # error if D > 0 and not drude
