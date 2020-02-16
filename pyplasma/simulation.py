@@ -237,7 +237,7 @@ class Domain():
 
     def observe(self):
         for observer in self.observers:
-            if self.it%observer.out_step == 0:
+            if self.it%observer.out_step == 0 and observer.out_step > 0:
                 observer.call()
 
 
@@ -245,6 +245,9 @@ class Domain():
 
         out_dico = {}
         for observer in self.observers:
+
+            if observer.out_step == -1:
+                observer.call()
 
             if observer.mode == 'return':
                 out_dico[observer.target] = observer.terminate()
