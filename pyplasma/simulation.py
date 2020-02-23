@@ -157,7 +157,7 @@ class Domain():
     def update_bounded_current(self):
         # See https://arxiv.org/abs/1603.09410
         for material in self.materials:
-            w0 = 2*c.pi*c.c/material.resonance if material.resonance > 0 else 0
+            w0 = 2*c.pi*c.c/material.resonance if material.resonance > 0 else 1/self.dt
             P = c.epsilon_0*((material.index**2 - 1)*self.fields['E'] + 
                               material.chi2*self.fields['E']**2 + 
                               material.chi3*self.fields['E']**3)
