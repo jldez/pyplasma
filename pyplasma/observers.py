@@ -109,7 +109,7 @@ class Observer():
             if self.x is not None:
                 data = data[int((self.x-self.domain.x.min())/self.domain.dx)]
 
-            if not self.keep_pml and self.x is None and self.domain.D > 0:
+            if not self.keep_pml and self.x is None and self.domain.D > 0 and self.domain.nb_pml > 0:
                 data = data[self.domain.nb_pml:-self.domain.nb_pml]
 
         if data is not None:
