@@ -14,17 +14,13 @@ import copy
 from pyplasma import *
 import scipy.constants as c
 
-# FIXME: Dirty workaround for overflows when fluence is too high. 
-# Stops the run and simply set the plasma density to 100%.
-import warnings 
-warnings.filterwarnings("error")
 
 
 def fth(material, tau, tolerance=0.01):
 
     Fmin, Fmax = 0.1, 10 # FIXME: hardcoded limits for minimal and maximal values
 
-    F = 0.75*tau**0.3
+    F = 10
     while abs(Fmax-Fmin) > tolerance:
 
         material_sample = copy.deepcopy(material)
@@ -33,17 +29,21 @@ def fth(material, tau, tolerance=0.01):
         dom = Domain()
         dom.add_laser(laser, remove_reflected_part=True)
         dom.add_material(material_sample)
-        dom.add_observer(Returner('rho'))
+        dom.add_observer(Returner('rho', out_step=-1))
 
-        try: # See comment above near warning stuff.
-            rho_max = dom.run((-2*tau, 2*tau), Nt=10*tau+1000, progress_bar=False)['rho'].max()
-        except: rho_max = material.density
+        def is_above_threshold(rho):
+            threshold = c.epsilon_0*material.m_red*c.m_e/c.e**2*material.index**2*(laser.omega**2+material.damping**2)
+            return rho.max() > threshold
 
-        threshold = c.epsilon_0*material.m_red*c.m_e/c.e**2*material.index**2*(laser.omega**2+material.damping**2)
-        if rho_max > threshold:
+        dom.add_observer(Stopper('rho', is_above_threshold, verbose=False))
+
+        rho_max = dom.run((-2*tau, 2*tau), Nt=10*tau+1000, progress_bar=False)['rho'].max()
+
+        if is_above_threshold(rho_max):
             Fmax = F
         else:
             Fmin = F
+			
         F = np.exp((np.log(Fmax)+np.log(Fmin))/2)
 
     return F

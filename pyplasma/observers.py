@@ -268,8 +268,14 @@ class Returner(Observer):
 
 
 
+class Stopper(Observer):
 
+    def __init__(self, target:str, condition:callable, x=None, y=None, z=None, verbose:bool=True):
+        super(Stopper, self).__init__(target, 'stop', x, y, z, keep_pml=False, out_step=1)
+        self.condition = condition
+        self.verbose = verbose
 
+    def call(self):
 class Viewer():
 
     def __init__(self, domain, target='', vlim=(0,0), figsize='default'):
@@ -448,4 +454,9 @@ def format_axis(ax, mode='length'):
     if mode == 'time':
         units += 's'
 
-    return axis, factor, units
+    return axis, factor, units    def call(self):
+        data = self.get_data()
+        if self.condition(data):
+            self.domain.running = False
+            if self.verbose:
+                print(f'Stopped simulation because the condition on {self.target} is True.')

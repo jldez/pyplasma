@@ -103,6 +103,8 @@ class Domain():
         else:
             self.tqdm_times = self.times
 
+        self.running = True
+
         for self.it, self.t in enumerate(self.tqdm_times):
 
             if self.D == 0:
@@ -119,6 +121,9 @@ class Domain():
                 self.update_pml_H()
                 self.update_H()
                 self.observe()
+
+            if not self.running:
+                break
 
         return self.terminate()
 
