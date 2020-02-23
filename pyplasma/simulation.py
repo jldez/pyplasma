@@ -201,6 +201,8 @@ class Domain():
 
                 if self.laser.source_mode.lower() == 'tfsf':
                     self.fields['E'][self.laser.index_in_domain+1,...,2] += ramp*self.dt/(c.epsilon_0*self.dx)*laser_E*imp0
+                elif self.laser.source_mode.lower() == 'soft':
+                    self.fields['E'][self.laser.index_in_domain,...,2] += ramp*self.dt/(c.epsilon_0*self.dx)*laser_E*imp0*2
                 elif self.laser.source_mode.lower() == 'hard':
                     self.fields['E'][self.laser.index_in_domain,...,2] = ramp*laser_E
 
