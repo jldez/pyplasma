@@ -302,13 +302,15 @@ class Domain():
 
     def set_boundaries(self, dt:float=0):
 
+        self.boundaries = []
+
         if self.D == 0:
-            self.boundaries = []
             return None
 
         if self.D > 0:
             self.nb_pml = int(self.pml_width/self.dx)
-            self.boundaries = [PML(self, 'xmin', dt), PML(self, 'xmax', dt)]
+            if self.nb_pml > 0:
+                self.boundaries += [PML(self, 'xmin', dt), PML(self, 'xmax', dt)]
             self.boundaries += [Periodic(self, 'y'), Periodic(self, 'z')]
         
 
