@@ -84,6 +84,7 @@ class Material():
         self.chi2 = chi2
         self.chi3 = chi3
         self.rho = 0
+        self.mask = 1
 
         self.trackables = []
 
@@ -147,8 +148,6 @@ class Material():
                 self.rate_equation = 'dre'
                 self.cross_section = ionization_params['cross_section']
                 self.trackables += ['el_heating_rate','hl_heating_rate','coll_freq_en','coll_freq_hn','critical_energy','r_e','r_h','xi_e','xi_h']
-
-            self.mask = 1
 
 
     def place_in_domain(self, domain, boundaries):
@@ -324,16 +323,4 @@ class Material():
         n = self._Drude_index
         self.reflectivity = np.abs((n-1.)/(n+1.))**2
         return bd.array(self.reflectivity)
-
-
-
-
-
-
-
-# def log_interp(zz, xx, yy):
-# 	logz = np.log10(zz)
-# 	logx = np.log10(xx)
-# 	logy = np.log10(yy)
-# 	return np.power(10.0, np.interp(logz, logx, logy))
 

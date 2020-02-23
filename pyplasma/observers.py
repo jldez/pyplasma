@@ -193,7 +193,6 @@ class Watcher(Observer):
 
         
 
-
     def terminate(self):
 
         # FIXME: loop over multiple windows doesn't work because stuck in while loop
@@ -226,14 +225,13 @@ class Dumper(Observer):
 
         self.zipfile = gzip.GzipFile(f'{target}.zip', 'wb')
 
-
     def call(self):
         data = self.get_data()
         self.zipfile.write(pickle.dumps(data))
 
-
     def terminate(self):
         self.zipfile.close()
+
 
 
 class Printer(Observer):
@@ -243,9 +241,9 @@ class Printer(Observer):
     def __init__(self, target:str=None, x=None, y=None, z=None, keep_pml=False, out_step=1):
         super(Printer, self).__init__(target, 'print', x, y, z, keep_pml, out_step)
 
-
     def call(self):
         print(self.get_data().mean())
+
 
 
 class Returner(Observer):
@@ -254,7 +252,6 @@ class Returner(Observer):
 
     def __init__(self, target:str=None, x=None, y=None, z=None, keep_pml=False, out_step=1):
         super(Returner, self).__init__(target, 'return', x, y, z, keep_pml, out_step)
-
         self.stack_data = []
 
     def call(self, data=None):

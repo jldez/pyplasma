@@ -22,7 +22,6 @@ Volume inhomogeneities
 Watcher should show actual material mask
 Loop over multiple watchers
 Dump and watch back dumped data
-Watcher out_step automatic to reduce slow downs
 Returner fail safe for memory
 Watcher in Fourier domain
 

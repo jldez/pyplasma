@@ -346,15 +346,3 @@ class Domain():
 
         return curl
 
-
-
-
-# class Time():
-
-#     def __init__(self, start, end, Nt):
-#         self.t = np.linspace(start, end, int(Nt))
-#         self.dt = self.t[1] - self.t[0]
-#         self.Nt = Nt
-
-
-
