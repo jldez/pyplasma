@@ -194,12 +194,13 @@ class Domain():
             # Section 3.0 of : https://studylib.net/doc/8392930/6.-total-field---scattered-field-fdtd-implementation-in-m...
             # Section 3.10 of : https://www.eecs.wsu.edu/~schneidj/ufdtd/chap3.pdf
             if self.laser is not None:
-                laser_E = self.laser.E(self.t)
 
+                laser_E = self.laser.E(self.t)
+                imp0 = (c.epsilon_0/c.mu_0)**0.5
                 ramp = (np.exp((self.it/10)**2)-1)/np.exp((self.it/10)**2) if self.laser_ramp and self.it < 30 else 1
 
                 if self.laser.source_mode.lower() == 'tfsf':
-                    self.fields['E'][self.laser.index_in_domain,...,2] += ramp*self.dt/(c.epsilon_0*self.dx)*laser_E/(120*c.pi)
+                    self.fields['E'][self.laser.index_in_domain+1,...,2] += ramp*self.dt/(c.epsilon_0*self.dx)*laser_E*imp0
                 elif self.laser.source_mode.lower() == 'hard':
                     self.fields['E'][self.laser.index_in_domain,...,2] = ramp*laser_E
 
@@ -217,15 +218,10 @@ class Domain():
             self.fields['H'] -= self.dt/c.mu_0 * self.curl_E(self.fields['E'])
 
             # add sources
-            if self.laser is not None and self.D > 0:
-                laser_E = self.laser.E(self.t)
-
+            if self.laser is not None and self.D > 0 and self.laser.source_mode.lower() == 'tfsf':
+                laser_E = self.laser.E(self.t-self.dt/2)
                 ramp = (np.exp((self.it/10)**2)-1)/np.exp((self.it/10)**2) if self.laser_ramp and self.it < 30 else 1
-
-                if self.laser.source_mode.lower() == 'tfsf':
-                    self.fields['H'][self.laser.index_in_domain,...,1] -= ramp*self.dt/(c.mu_0*self.dx)*laser_E
-                elif self.laser.source_mode.lower() == 'hard':
-                    pass
+                self.fields['H'][self.laser.index_in_domain,...,1] -= ramp*self.dt/(c.mu_0*self.dx)*laser_E
 
             # boundaries
             for boundary in self.boundaries:
