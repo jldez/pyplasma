@@ -19,7 +19,8 @@ if __name__ == '__main__':
     dom.add_material(material, boundaries={'xmin':300*nm})
     surface_roughness(material, boundary='xmin', amplitude=20*nm, noise='fractal', feature_size=100*nm, show=True)
 
-    dom.add_observer(Watcher('E', x=400*nm, vlim=(-laser.E0*1.1, laser.E0*1.1), keep_pml=True, out_step=10))
-    dom.add_observer(Watcher('rho', x=400*nm, vlim=(0,material.density), out_step=10, loop=True))
+    dom.add_observer(Watcher('E', x=400*nm, keep_pml=True, out_step=10))
+    dom.add_observer(Watcher('rho', x=400*nm, vlim=(0,2e28), out_step=10, loop=False, fourier=True, colormap='hot'))
+    dom.add_observer(Watcher('rho', x=400*nm, out_step=10, loop=True))
 
     results = dom.run(15*fs, stability_factor=0.9)

@@ -117,6 +117,18 @@ class Observer():
         else:
             raise ValueError(f'Could not get {target} from simulation domain.')
 
+    
+    def get_fourier_data(self, target=None, slicing=True):
+        data = self.get_data(target, slicing)
+
+        fft = np.fft.fft if self.D < 2 else np.fft.fft2
+
+        complex_fourier_data = fft(data)
+        fourier_data = (complex_fourier_data.real**2 + complex_fourier_data.imag**2)**0.5
+        fourier_data = np.fft.fftshift(fourier_data)
+
+        return fourier_data
+
 
     def terminate(self):
         pass
@@ -134,9 +146,12 @@ class Watcher(Observer):
     # TODO: Documentation
     # TODO: Log graphs
 
-    def __init__(self, target:str=None, x=None, y=None, z=None, vlim=(0,0), figsize='default', c='C0', colormap='seismic', keep_pml=False, loop=False, out_step=1):
+    def __init__(self, target:str=None, x=None, y=None, z=None, fourier:bool=False, 
+                 vlim=(0,0), figsize='default', c='C0', colormap='seismic', keep_pml=False, 
+                 loop=False, out_step=1):
         super(Watcher, self).__init__(target, 'watch', x, y, z, keep_pml, out_step)
 
+        self.fourier = fourier
         self.vlim = vlim
         self.figsize = figsize
         self.c = c
@@ -150,7 +165,8 @@ class Watcher(Observer):
 
     def call(self, data=None):
 
-        data = self.get_data() if data is None else data
+        get_data = self.get_data if not self.fourier else self.get_fourier_data
+        data = get_data() if data is None else data
 
         if self.save_data:
             self.stack_data.append(copy.deepcopy(data))
@@ -170,7 +186,7 @@ class Watcher(Observer):
                     axis = {'y': np.linspace(0, self.domain.Ly, self.domain.Ny)}
                 if self.z is None:
                     axis = {'z': np.linspace(0, self.domain.Lz, self.domain.Nz)}
-                self.viewer = Viewer1d(axis, self.domain, self.target, self.vlim, self.c, self.keep_pml, self.figsize)
+                self.viewer = Viewer1d(axis, self.domain, self.target, self.fourier, self.vlim, self.c, self.keep_pml, self.figsize)
 
             if self.D == 2:
                 if self.x is not None:
@@ -182,7 +198,7 @@ class Watcher(Observer):
                 if self.z is not None:
                     axes = {'x': np.linspace(0, self.domain.Lx, self.domain.Nx),
                             'y': np.linspace(0, self.domain.Ly, self.domain.Ny)}
-                self.viewer = Viewer2d(axes, self.domain, self.target, self.vlim, self.colormap, self.keep_pml, self.figsize)
+                self.viewer = Viewer2d(axes, self.domain, self.target, self.fourier, self.vlim, self.colormap, self.keep_pml, self.figsize)
 
             if self.D == 3:
                 raise NotImplementedError('3D view is not available.')
@@ -199,6 +215,13 @@ class Watcher(Observer):
 
         self.save_data = False
 
+        if self.loop:
+            print(f'Looping over {self.target}.')
+            self.start_loop()
+
+
+    def start_loop(self):
+
         while self.loop:
 
             if self.D == 0:
@@ -210,6 +233,7 @@ class Watcher(Observer):
 
             if type(self.loop) == int:
                 self.loop -= 1
+
 
     def exit_loop(self, event):
         self.loop = False
