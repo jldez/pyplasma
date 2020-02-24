@@ -168,10 +168,14 @@ class Domain():
 
     def update_free_current(self):
         for material in self.materials:
+            
             if material.drude:
                 G = material.damping*self.dt/2
                 self.fields['Jf'] = material.mask[...,None]*(self.fields['Jf']*(1-G)/(1+G) \
                                     + self.dt*c.epsilon_0*material.plasma_freq[...,None]**2*self.fields['E']/(1+G))
+
+            else:
+                self.fields['Jf'] = material.mask[...,None]*2*c.epsilon_0*material.index*material.index_imag*self.laser.omega*self.fields['E']
 
 
 

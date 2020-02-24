@@ -79,7 +79,13 @@ class Material():
 
     def __init__(self, index, resonance=0, chi2=0, chi3=0, drude_params:dict={}, ionization_params:dict={}):
 
-        self.index = index
+        if type(index) == complex:
+            self.index = index.real
+            self.index_imag = index.imag
+        else:
+            self.index = index
+            self.index_imag = 0
+
         self.resonance = resonance
         self.chi2 = chi2
         self.chi3 = chi3
