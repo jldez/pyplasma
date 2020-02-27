@@ -67,7 +67,7 @@ class Observer():
         #### Plasma density, energies and formation rates ##################################
         # TODO : get the actual list of material's tracktables
         if target in ['rho','rho_k','rho_hk','Ekin','Ekin_h',
-                      'el_heating_rate','critical_energy',
+                      'el_heating_rate','hl_heating_rate','critical_energy',
                       'r_e','r_h','xi_e','xi_h','coll_freq_en','coll_freq_hn']:
             data = 0
             for material in self.domain.materials:
