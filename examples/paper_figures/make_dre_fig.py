@@ -21,8 +21,8 @@ if __name__ == '__main__':
 	colors = plt.cm.terrain(np.linspace(0.0, 1.0, 24))
 	lw=2
 
-	params_abc = [10*fs, 1.6e4, 2000]
-	params_def = [300*fs, 4.8e4, 10000]
+	params_abc = [10*fs, 1.5e4, 2000]
+	params_def = [300*fs, 4.7e4, 10000]
 
 	for i, params in enumerate([params_abc, params_def]):
 
@@ -40,6 +40,7 @@ if __name__ == '__main__':
 		t_axis = dom.times/fs
 
 		# Plasma density
+		# print((results['rho']/mat.density).max())
 		ax = fig.add_subplot(3,2,1+i)
 		ax.semilogy(t_axis, results['rho']/mat.density, label=r"$\rho$", color=colors[2], lw=lw)
 		ax.semilogy(t_axis, results["rho"]*results["xi_e"]/mat.density, label=r"$\xi^e\rho$", color="darkred", lw=lw)
@@ -55,15 +56,23 @@ if __name__ == '__main__':
 		if i == 1:
 			ax.yaxis.tick_right()
 			plt.text(-13.1*42.9,2e-1,r"$\mathrm{(d)}$")
-		ax.yaxis.set_ticks_position('both')
+		# ax.yaxis.set_ticks_position('both')
 		ax.yaxis.set_ticks([1e-8, 1e-6, 1e-4, 1e-2, 1e0])
 		plt.xlim(t_axis.min(), t_axis.max())
+
+		# # Electric field
+		# ax = ax.twinx()
+		# ax.fill_between(t_axis, results['E']/las.E0, alpha=0.3)
+		# plt.setp(ax.get_xticklabels(), visible=False)
+		# plt.setp(ax.get_yticklabels(), visible=False)
+		# plt.ylim(0,1)
 
 		# Temperature of the electrons
 		ax2 = fig.add_subplot(3,2,3+i)
 		Fermi_energy = c.hbar**2*(3*c.pi**2*results["rho"])**(2/3)/(2*c.m_e)
 		Ekinmax = el_Ekin_max(results['E'].max(), mat, las)
-		ax2.semilogy(t_axis, results["Ekin"]/eV, color=colors[2], label=r"$\mathcal{E}^e_\mathrm{k}$", lw=lw)
+		# print(Ekinmax/eV, results["Ekin"].max()/eV)
+		ax2.semilogy(t_axis, results["Ekin"]/eV, color=colors[2], label=r"$\mathcal{E}^e_\mathrm{kin}$", lw=lw)
 		ax2.semilogy(t_axis, Fermi_energy/eV, label=r"$\mathcal{E}_F$", color="darkred", ls="-", lw=lw)
 		ax2.semilogy(t_axis, Ekinmax*np.ones(Nt)/eV, color="k",ls="--", label="limit", lw=lw)
 		plt.ylim(0.01,30)
@@ -82,7 +91,7 @@ if __name__ == '__main__':
 		# Collision rates
 		ax3 = fig.add_subplot(3,2,5+i)
 		plt.semilogy(t_axis, results["coll_freq_en"]*fs, label=r"$\gamma_{n}^e$", color=colors[2], lw=lw)
-		plt.semilogy(t_axis, results["el_heating_rate"]*fs, label=r"$\gamma_\mathrm{ib}^e$", color="darkred", lw=lw)
+		plt.semilogy(t_axis, results["el_heating_rate"]*fs, label=r"$\gamma_\mathrm{jh}^e$", color="darkred", lw=lw)
 		plt.semilogy(t_axis, ee_coll_freq(results['Ekin'], mat)*1e-15, label=r"$\gamma_{e}^e$", color="k", ls="--", lw=lw)
 		plt.ylim(5e-7, 50)
 		if i == 0:

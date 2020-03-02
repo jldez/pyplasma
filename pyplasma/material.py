@@ -327,6 +327,11 @@ class Material():
     @property
     def Reflectivity(self):
         n = self._Drude_index
-        self.reflectivity = np.abs((n-1.)/(n+1.))**2
+        self.reflectivity = np.abs((n-1)/(n+1))**2
         return bd.array(self.reflectivity)
+
+    @property
+    def Transmitivity(self):
+        self.transmitivity = 1-self.Reflectivity
+        return bd.array(self.transmitivity)
 

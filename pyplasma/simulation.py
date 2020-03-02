@@ -71,7 +71,7 @@ class Domain():
             self.fields[field] = bd.zeros(self.field_shape)
 
 
-    def run(self, time, stability_factor:float=0.95, Nt:int='auto', progress_bar:bool=True):            
+    def run(self, time, stability_factor:float=0.95, Nt:int='auto', progress_bar:bool=True, verbose:bool=True):            
 
         if type(time) == tuple:
             self.start_time = time[0]
@@ -89,7 +89,7 @@ class Domain():
             self.dt = self.Lt/self.Nt
         self.times = np.linspace(self.start_time, self.end_time, self.Nt)
 
-        if self.D > 0:
+        if self.D > 0 and verbose:
             fdx, fdy, fdz = [format_value(d,'m') for d in [self.dx, self.dy, self.dz]]
             print(f'Space discretization: dx={fdx[0]:.1f}{fdx[2]}, dy={fdy[0]:.1f}{fdy[2]}, dz:{fdz[0]:.1f}{fdz[2]}.')
             fdt = format_value(self.dt,'s')

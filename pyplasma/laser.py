@@ -85,7 +85,7 @@ class Laser():
 		# Transmition
 		if self.remove_reflected_part and self.domain.D == 0:
 			material = self.domain.materials[0]
-			E *= ((1.-material.Reflectivity)/material.index)**0.5
+			E *= ((1.-material.Reflectivity)/material._Drude_index.real)**0.5
 
 		return E
 

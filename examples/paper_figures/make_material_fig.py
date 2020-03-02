@@ -29,17 +29,24 @@ def fth(material, tau, tolerance=0.01):
         dom = Domain()
         dom.add_laser(laser, remove_reflected_part=True)
         dom.add_material(material_sample)
-        dom.add_observer(Returner('rho', out_step=-1))
+        dom.add_observer(Returner('fi_rate', out_step=1))
+        dom.add_observer(Returner('ii_rate', out_step=1))
+        dom.add_observer(Returner('rho', out_step=1))
+        dom.add_observer(Returner('el_heating_rate', out_step=1))
+        dom.add_observer(Returner('hl_heating_rate', out_step=1))
 
-        def is_above_threshold(rho):
-            threshold = c.epsilon_0*material.m_red*c.m_e/c.e**2*material.index**2*(laser.omega**2+material.damping**2)
-            return rho.max() > threshold
+        def full_ionization(rho):
+            return rho > 0.99*material.density
+        dom.add_observer(Stopper('rho', full_ionization, verbose=False))
 
-        dom.add_observer(Stopper('rho', is_above_threshold, verbose=False))
+        def is_above_threshold(results):
+            absorbed_energy_interband = np.sum(results['fi_rate']*material.bandgap)
+            absorbed_energy_intraband = np.sum(results['rho']*(results['el_heating_rate']+results['hl_heating_rate'])*c.hbar*dom.laser.omega*dom.dt)
+            return absorbed_energy_intraband + absorbed_energy_interband > 3e9
 
-        rho_max = dom.run((-2*tau, 2*tau), Nt=10*tau+1000, progress_bar=False)['rho'].max()
+        results = dom.run((-2*tau, 2*tau), Nt=500+tau/fs, progress_bar=False)
 
-        if is_above_threshold(rho_max):
+        if is_above_threshold(results):
             Fmax = F
         else:
             Fmin = F
@@ -56,24 +63,24 @@ if __name__ == '__main__':
 
 	materials = {
 
-		'sio2':Material(index=1.45, drude_params={'damping':2e15}, 
+		'sio2':Material(index=1.45, drude_params={'damping':2e15, 'm_CB':1}, 
                         ionization_params={'rate_equation':'dre','bandgap':9*eV,
                                            'density':2.2e28,'cross_section':6.61e-20,
                                            'recombination_rate':1/250e-15}),
 
-		'al2o3':Material(index=1.76, drude_params={'damping':1e15, 'm_CB':0.8}, 
+		'al2o3':Material(index=1.76, drude_params={'damping':1e15, 'm_CB':1}, 
                         ionization_params={'rate_equation':'dre','bandgap':6.5*eV,
                                            'density':2.35e28,'cross_section':1.33e-19}),
 
-		'hfo2':Material(index=2.09, drude_params={'damping':0.5e15, 'm_CB':0.4}, 
+		'hfo2':Material(index=2.09, drude_params={'damping':1e15, 'm_CB':0.8}, 
                         ionization_params={'rate_equation':'dre','bandgap':5.1*eV,
                                            'density':2.77e28,'cross_section':1.24e-19}),
 
-		'ta2o5':Material(index=2.1, drude_params={'damping':0.4e15, 'm_CB':0.5}, 
+		'ta2o5':Material(index=2.1, drude_params={'damping':1e15, 'm_CB':1.0}, 
                         ionization_params={'rate_equation':'dre','bandgap':3.8*eV,
                                            'density':1.12e28,'cross_section':2.50e-19}),
 
-		'tio2':Material(index=2.52, drude_params={'damping':0.5e15, 'm_CB':0.3}, 
+		'tio2':Material(index=2.52, drude_params={'damping':1e15, 'm_CB':0.5}, 
                         ionization_params={'rate_equation':'dre','bandgap':3.3*eV,
                                            'density':3.19e28,'cross_section':1.08e-19}),
 	}
@@ -135,6 +142,6 @@ if __name__ == '__main__':
 	plt.ylabel(r"$F_{\mathrm{th}}~\mathrm{[J/cm}^2]$")
 	plt.tight_layout()
 
-	# plt.savefig("materials.pdf")
-	# os.system("pdfcrop materials.pdf materials.pdf > /dev/null")
+	# plt.savefig("materials_energy.pdf")
+	# os.system("pdfcrop materials_energy.pdf materials_energy.pdf > /dev/null")
 	plt.show()
