@@ -45,7 +45,7 @@ if __name__ == '__main__':
 		ax.semilogy(t_axis, results['rho']/mat.density, label=r"$\rho$", color=colors[2], lw=lw)
 		ax.semilogy(t_axis, results["rho"]*results["xi_e"]/mat.density, label=r"$\xi^e\rho$", color="darkred", lw=lw)
 		ax.semilogy(t_axis, results["rho_fi"]/mat.density, color="k", ls="--", label=r"$\rho_{\mathrm{fi}}$", lw=lw)
-		ax.semilogy(t_axis, results["rho_ii"]/mat.density, color="k", ls=":", label=r"$\rho_{\mathrm{ii}}$", lw=lw)
+		ax.semilogy(t_axis, results["rho_ii"]/mat.density, color="k", ls=":", label=r"$\rho_{\mathrm{ci}}$", lw=lw)
 		plt.ylim(1e-8, 1e0)
 		plt.setp(ax.get_xticklabels(), visible=False)
 		if i == 0:

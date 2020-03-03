@@ -114,7 +114,7 @@ if __name__ == '__main__':
     l2, = plt.plot(taus/fs, fths_noII, c="darkgreen", lw=2.0, ls="--")
     l3, = plt.plot(taus[:12]/fs, fths_noJH[:11]+[35], c="darkblue", lw=2.0, ls="-.") #Not cheating, just removing border effect
 
-    plt.figlegend([l1,l2,l3],[r"$\mathrm{FI+JH+II}$",r"$\mathrm{FI+JH}$",r"$\mathrm{FI~only}$"],
+    plt.figlegend([l1,l2,l3],[r"$\mathrm{FI+JH+CI}$",r"$\mathrm{FI+JH}$",r"$\mathrm{FI~only}$"],
     			loc=(0.68,0.21),frameon=False, fontsize=13)
 
     pos_arrow1 = 8
