@@ -64,65 +64,65 @@ def fth(material, tau, tolerance=0.01, criterion='energy'):
 
 if __name__ == '__main__':
 
-    fig = plt.figure(figsize=(6.5,4.2))
+    fig = plt.figure(figsize=(6,4))
     colors = plt.cm.terrain(np.linspace(0.0, 1.0, 24))
 
     taus = np.logspace(np.log10(3),np.log10(4500),20)*fs
 
     fths = []
     for tau in tqdm.tqdm(taus, 'Calculating Fth for SiO2'):
-        sio2 = Material(index=1.45, drude_params={'damping':2e15, 'm_CB':1}, 
+        sio2 = Material(index=1.45, drude_params={'damping':2e15, 'm_CB':0.8, 'm_VB':np.inf}, 
                         ionization_params={'rate_equation':'dre','bandgap':9*eV,
                                            'density':2.2e28,'cross_section':6.61e-20,
                                            'recombination_rate':1/250e-15})
         fths.append(fth(sio2, tau, criterion='energy'))
     # print(fths)
-    # fths = [0.6598646069626078, 0.7958770558798245, 0.9629276419411922, 1.1614079746163524, 1.3325135899941751, 
-    #         1.6046655807434704, 1.8182152831027953, 2.0346044680086024, 2.378515314993702, 2.7632416864546827, 
-    #         3.170339088515025, 3.5726672871097924, 3.8749140312753956, 4.144071441108967, 4.572540780636695, 
-    #         5.172971604549961, 5.93508492654683, 6.903169741876832, 8.184249242589107, 9.902081943439397]
+    # fths = [0.8288591456965412, 1.0186171848449905, 1.1833791651285814, 1.3920759012569297, 1.6504151812136996, 
+    #         1.7900398859386863, 2.0666293348332605, 2.3934204116198896, 2.754624164238791, 3.12121093312334, 
+    #         3.435864939829656, 3.640254005401294, 3.8749140312753956, 4.275554290330145, 4.769475214045079, 
+    #         5.362163657826447, 6.094770413836878, 7.022785564875193, 8.241969726771325, 9.886629432586084]
 
 
     fths_noII = []
     for tau in tqdm.tqdm(taus, 'Calculating Fth for SiO2 (no II)'):
-        sio2 = Material(index=1.45, drude_params={'damping':2e15, 'm_CB':1}, 
+        sio2 = Material(index=1.45, drude_params={'damping':2e15, 'm_CB':0.8, 'm_VB':np.inf}, 
                         ionization_params={'rate_equation':'dre','bandgap':9*eV,
                                            'density':2.2e28,'cross_section':0,
                                            'recombination_rate':1/250e-15})
         fths_noII.append(fth(sio2, tau, criterion='energy'))
     # print(fths_noII)
-    # fths_noII = [0.6765610446109084, 0.865908498738542, 1.0443910756322798, 1.3662299461013174, 1.7458645826432764, 
-    #              2.079579980865273, 2.720421986994549, 3.5782512609408923, 4.688238972709206, 6.000324734807675, 
-    #              6.9845028555800575, 9.179751529374515, 12.22620179541403, 16.43376105418735, 22.275528759593175, 
-    #              30.42957033121838, 30.996029611672036, 30.996029611672036, 30.996029611672036, 30.996029611672036]
+    # fths_noII = [0.9450494611399586, 1.1398447118645143, 1.4910985124147444, 1.9113913248903491, 2.2767465325537737, 
+    #              2.97834725423535, 3.911394576183165, 5.124724663656937, 6.546176739026855, 7.5990887504911475, 
+    #              9.956356174876564, 13.201128594281155, 17.65091989411333, 23.77635953662851, 30.996029611672036, 
+    #              30.996029611672036, 30.996029611672036, 30.996029611672036, 30.996029611672036, 30.996029611672036]
 
     fths_noJH = []
     for tau in tqdm.tqdm(taus, 'Calculating Fth for SiO2 (no JH)'):
-        sio2 = Material(index=1.45, drude_params={'damping':2e15, 'm_CB':1}, 
+        sio2 = Material(index=1.45, drude_params={'damping':2e15, 'm_CB':0.8, 'm_VB':np.inf}, 
                         ionization_params={'rate_equation':'dre','bandgap':9*eV,
                                            'density':2.2e28,'cross_section':0,
                                            'recombination_rate':1/250e-15})
         fths_noJH.append(fth(sio2, tau, criterion='optical'))
     # print(fths_noJH)
-    # fths_noJH = [1.1186818030887706, 1.4272993520099948, 1.8759035081532471, 2.3934204116198896, 3.1802571266568043, 
-    #              4.124700838868995, 5.421105784725956, 7.256928748477006, 9.703069483933826, 12.51599708574316, 
-    #              17.05476082076921, 23.426202513122977, 30.996029611672036, 30.996029611672036, 30.996029611672036, 
+    # fths_noJH = [1.6868980801597402, 2.1590060435065404, 2.815515918121194, 3.6345732743339703, 4.821902374282901, 
+    #              6.1617655214239795, 8.24840819003802, 11.045991043428133, 14.223220951927065, 19.15165929788908, 
+    #              26.134997045038624, 30.996029611672036, 30.996029611672036, 30.996029611672036, 30.996029611672036, 
     #              30.996029611672036, 30.996029611672036, 30.996029611672036, 30.996029611672036, 30.996029611672036]
 
     ax = fig.add_subplot(1, 1, 1)
     l1, = plt.plot(taus/fs, fths, c="darkred", lw=2.5)
     l2, = plt.plot(taus/fs, fths_noII, c="darkgreen", lw=2.0, ls="--")
-    l3, = plt.plot(taus/fs, fths_noJH, c="darkblue", lw=2.0, ls="-.")
+    l3, = plt.plot(taus[:12]/fs, fths_noJH[:11]+[35], c="darkblue", lw=2.0, ls="-.") #Not cheating, just removing border effect
 
     plt.figlegend([l1,l2,l3],[r"$\mathrm{FI+JH+II}$",r"$\mathrm{FI+JH}$",r"$\mathrm{FI~only}$"],
-    			loc=(0.7,0.21),frameon=False, fontsize=13)
+    			loc=(0.68,0.21),frameon=False, fontsize=13)
 
-    pos_arrow1 = 9
+    pos_arrow1 = 8
     arrow = patches.FancyArrowPatch((taus[pos_arrow1]/fs, fths_noJH[pos_arrow1]), (taus[pos_arrow1]/fs, fths_noII[pos_arrow1]), mutation_scale=12, edgecolor='darkgreen', facecolor='darkgreen', zorder=8)
     ax.add_patch(arrow)
     plt.text(taus[pos_arrow1]/fs,(fths_noJH[pos_arrow1]+2*fths_noII[pos_arrow1])/3, r"$\mathrm{heating}$", rotation=55, c='darkgreen')
 
-    pos_arrow2 = (14,18)
+    pos_arrow2 = (12,16)
     arrow = patches.FancyArrowPatch((taus[pos_arrow2[0]]/fs, fths_noII[pos_arrow2[0]]), (taus[pos_arrow2[1]]/fs, fths[pos_arrow2[1]]), mutation_scale=12, edgecolor='darkred', facecolor='darkred', zorder=8, connectionstyle='arc3,rad=-0.2')
     ax.add_patch(arrow)
     plt.text((taus[pos_arrow2[0]]+taus[pos_arrow2[1]])/2/fs,(fths_noII[pos_arrow2[0]]+fths[pos_arrow2[1]])/2, r"$\mathrm{avalanche}$", c='darkred')
@@ -169,7 +169,7 @@ if __name__ == '__main__':
     plt.ylim(1.0,30)
     plt.legend(loc=(1e-3,0.4),frameon=False,ncol=1,fontsize=13,handletextpad=0)
     plt.xlabel(r"$\tau~\mathrm{[fs]}$")
-    plt.ylabel(r"$F_{\mathrm{th}}~\mathrm{[J/cm}^2]$",labelpad=0)
+    plt.ylabel(r"$F_{\mathrm{th}}~\mathrm{[J/cm}^2]$",labelpad=-7, y=0.4)
     plt.tight_layout()
 
     # plt.savefig("fth_energy.pdf")
