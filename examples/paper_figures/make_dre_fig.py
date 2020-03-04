@@ -21,8 +21,8 @@ if __name__ == '__main__':
 	colors = plt.cm.terrain(np.linspace(0.0, 1.0, 24))
 	lw=2
 
-	params_abc = [10*fs, 1.5e4, 2000]
-	params_def = [300*fs, 4.7e4, 10000]
+	params_abc = [10*fs, 1.5e4, 1000]
+	params_def = [300*fs, 4.7e4, 3000]
 
 	for i, params in enumerate([params_abc, params_def]):
 
@@ -49,23 +49,19 @@ if __name__ == '__main__':
 		plt.ylim(1e-8, 1e0)
 		plt.setp(ax.get_xticklabels(), visible=False)
 		if i == 0:
-			plt.ylabel(r"$\mathrm{Density}/\rho_{\mathrm{mol}}$")
+			ax.set_ylabel(r"$\mathrm{Density}/\rho_m$")
 			plt.setp(ax.get_yticklabels(), visible=False)
-			plt.legend(loc=4, frameon=False, labelspacing=0.3, handletextpad=0.2, borderaxespad=0.2)
-			ax.text(-18.7, 2e-1, r"$\mathrm{(a)}$")
+			ax.legend(loc=4, frameon=False, labelspacing=0.3, handletextpad=0.2, borderaxespad=0.2)
+			ax.text(-18.7, 1.5e-1, r"$\mathrm{(a)}$")
 		if i == 1:
 			ax.yaxis.tick_right()
-			plt.text(-13.1*42.9,2e-1,r"$\mathrm{(d)}$")
-		# ax.yaxis.set_ticks_position('both')
+			ax.text(-13.1*42.9,1.5e-1,r"$\mathrm{(d)}$")
+		ax.yaxis.set_ticks_position('both')
 		ax.yaxis.set_ticks([1e-8, 1e-6, 1e-4, 1e-2, 1e0])
-		plt.xlim(t_axis.min(), t_axis.max())
+		ax.set_xlim(t_axis.min(), t_axis.max())
 
-		# # Electric field
-		# ax = ax.twinx()
-		# ax.fill_between(t_axis, results['E']/las.E0, alpha=0.3)
-		# plt.setp(ax.get_xticklabels(), visible=False)
-		# plt.setp(ax.get_yticklabels(), visible=False)
-		# plt.ylim(0,1)
+		# Electric field
+		ax.fill_between(t_axis, (results['E']/las.E0)**2, y2=1e-8, alpha=0.15, color='g', lw=2)
 
 		# Temperature of the electrons
 		ax2 = fig.add_subplot(3,2,3+i)
@@ -81,10 +77,10 @@ if __name__ == '__main__':
 			plt.ylabel(r"$\mathrm{Energy~[eV]}$")
 			plt.setp(ax2.get_yticklabels(),visible=False)
 			plt.legend(loc=4,frameon=False,labelspacing=0.3,handletextpad=0.2,borderaxespad=0.2)
-			plt.text(-18.7, 15, r"$\mathrm{(b)}$")
+			plt.text(-18.7, 13, r"$\mathrm{(b)}$")
 		if i == 1:
 			ax2.yaxis.tick_right()
-			plt.text(-13.1*42.9, 15, r"$\mathrm{(e)}$")
+			plt.text(-13.1*42.9, 13, r"$\mathrm{(e)}$")
 		ax2.yaxis.set_ticks_position('both')
 		plt.xlim(t_axis.min(),t_axis.max())
 
@@ -98,14 +94,19 @@ if __name__ == '__main__':
 			plt.ylabel(r"$\mathrm{Frequency~[fs}^{-1}]$")
 			plt.setp(ax3.get_yticklabels(), visible=False)
 			plt.legend(loc=4, frameon=False, labelspacing=0.3, handletextpad=0.2, bbox_to_anchor=(0.97, -0.03))
-			plt.text(-18.7, 10, r"$\mathrm{(c)}$")
+			plt.text(-18.7, 7, r"$\mathrm{(c)}$")
 		if i == 1:
 			ax3.yaxis.tick_right()
-			plt.text(-13.1*42.9, 10, r"$\mathrm{(f)}$")
+			plt.text(-13.1*42.9, 7, r"$\mathrm{(f)}$")
 		plt.xlabel(r"$t~[\mathrm{fs}]$")
 		ax3.yaxis.set_ticks_position('both')
 		ax3.yaxis.set_ticks([1e-6, 1e-4, 1e-2, 1e0])
 		plt.xlim(t_axis.min(), t_axis.max())
+
+		if i == 0:
+			ax.xaxis.set_ticks([-20,-10,0,10,20])
+			ax2.xaxis.set_ticks([-20,-10,0,10,20])
+			ax3.xaxis.set_ticks([-20,-10,0,10,20])
 
 		if i == 1:
 			ax.xaxis.set_ticks([-500,-250,0,250,500])
@@ -114,8 +115,8 @@ if __name__ == '__main__':
 
 
 	plt.subplots_adjust(hspace = 0.1,wspace = 0.1)
-	# plt.savefig("dre.pdf")
-	# os.system("pdfcrop dre.pdf dre.pdf > /dev/null")
+	plt.savefig("dre.pdf")
+	os.system("pdfcrop dre.pdf dre.pdf > /dev/null")
 
-	plt.show()
+	# plt.show()
 
