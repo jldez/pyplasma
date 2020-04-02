@@ -22,6 +22,9 @@ def ponderomotive_energy(E, material, laser):
 def get_critical_energy(E, material, laser):
     return (1+material.m_red/material.m_VB) * (material.bandgap + ponderomotive_energy(E, material, laser))
 
+def critical_plasma_density(material, laser):
+    return c.epsilon_0*material.m_red*c.m_e/c.e**2*(laser.omega**2 + material.damping**2)
+
 def ee_coll_freq(Ekin, material):
     """ electron-electron collision rate """
     return 4*c.pi*c.epsilon_0/c.e**2*(6/material.m_CB/c.m_e)**0.5*(2*Ekin/3)**1.5
@@ -64,8 +67,8 @@ def surface_roughness(material, boundary, amplitude, noise='white', feature_size
     if noise.lower() == 'binary':
         roughness_map = binary_roughness_map(shape=(material.domain.Ny,material.domain.Nz), fill_factor=fill_factor)
 
-    if noise.lower() in ['perlin, fractal']:
-        feature_size = amplitude if feature_size is 'default' else feature_size
+    if noise.lower() in ['perlin', 'fractal']:
+        feature_size = amplitude if feature_size == 'default' else feature_size
         res = (int(material.domain.Ly/feature_size),int(material.domain.Lz/feature_size))
         if noise.lower() == 'perlin':
             roughness_map = perlin_roughness_map(shape=(material.domain.Ny,material.domain.Nz), res=res)
@@ -92,6 +95,8 @@ def surface_roughness(material, boundary, amplitude, noise='white', feature_size
         material.mask[:,iy,-1] = material.mask[:,iy,0]
     for iz in range(0,material.domain.Nz):
         material.mask[:,-1,iz] = material.mask[:,0,iz]
+
+    return roughness_map
 
 
 def white_roughness_map(shape):
