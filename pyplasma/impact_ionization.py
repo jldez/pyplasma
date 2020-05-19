@@ -48,7 +48,7 @@ def sre(E, material, laser):
 	ii_rate = material.alpha_sre*material.rho*intensity
 
 	# Saturation FIXME :should be done simultaneously for both FI and II
-	ii_rate *= (material.density-material.rho)/material.density
+	ii_rate *= (material.density-material.rho-material.trapped_rho)/material.density
 
 	return ii_rate
 

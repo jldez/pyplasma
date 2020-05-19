@@ -53,7 +53,7 @@ def el_Ekin_max(E, material, laser):
         /(2.*Ec*material.cross_section*material.density)*(material.m_CB*c.m_e*c.pi/(3.*Ec))**.5))).max()
 
 
-def surface_roughness(material, boundary, amplitude, noise='white', feature_size='default', fill_factor=0, show=False):
+def surface_roughness(material, boundary, amplitude=1, noise='white', feature_size='default', fill_factor=0, show=False, roughness_map=None):
 
     if not hasattr(material, 'domain'):
         raise ValueError('Material has to be attached to a Domain in order to add surface roughness to it.')
@@ -61,27 +61,29 @@ def surface_roughness(material, boundary, amplitude, noise='white', feature_size
     if boundary != 'xmin':
         raise NotImplementedError('Surface roughness can only be attached to the xmin boundary.')
 
-    if noise.lower() == 'white':
-        roughness_map = white_roughness_map(shape=(material.domain.Ny,material.domain.Nz))
+    if roughness_map is None:
+        if noise.lower() == 'white':
+            roughness_map = white_roughness_map(shape=(material.domain.Ny,material.domain.Nz))
 
-    if noise.lower() == 'binary':
-        roughness_map = binary_roughness_map(shape=(material.domain.Ny,material.domain.Nz), fill_factor=fill_factor)
+        if noise.lower() == 'binary':
+            roughness_map = binary_roughness_map(shape=(material.domain.Ny,material.domain.Nz), fill_factor=fill_factor)
 
-    if noise.lower() in ['perlin', 'fractal']:
-        feature_size = amplitude if feature_size == 'default' else feature_size
-        res = (int(material.domain.Ly/feature_size),int(material.domain.Lz/feature_size))
-        if noise.lower() == 'perlin':
-            roughness_map = perlin_roughness_map(shape=(material.domain.Ny,material.domain.Nz), res=res)
-        if noise.lower() == 'fractal':
-            roughness_map = fractal_roughness_map(shape=(material.domain.Ny,material.domain.Nz), res=res)
+        if noise.lower() in ['perlin', 'fractal']:
+            feature_size = amplitude if feature_size == 'default' else feature_size
+            res = (int(material.domain.Ly/feature_size),int(material.domain.Lz/feature_size))
+            if noise.lower() == 'perlin':
+                roughness_map = perlin_roughness_map(shape=(material.domain.Ny,material.domain.Nz), res=res)
+            if noise.lower() == 'fractal':
+                roughness_map = fractal_roughness_map(shape=(material.domain.Ny,material.domain.Nz), res=res)
 
-    roughness_map *= amplitude
+        roughness_map *= amplitude
 
     if show:
         fig = plt.figure()
         plt.imshow(roughness_map, cmap='gray')
         fig.canvas.set_window_title('Roughness map')
         plt.show(block=False)
+        plt.pause(0.01)
 
     ix, rem = material.parse_index(material.boundaries[boundary]/material.domain.dx)
 

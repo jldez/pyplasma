@@ -94,6 +94,7 @@ class Material():
 
         self.trackables = []
 
+        self.drude_params = drude_params
         if drude_params == {}:
             self.drude = False
         else:
@@ -110,11 +111,12 @@ class Material():
             else: 
                 self.m_red = self.m_CB
             if 'rho' in drude_params:
-                if type(drude_params['rho']) in [int, float]:
-                    self.rho = drude_params['rho']
-                else: 
-                    self.rho = bd.array(drude_params['rho'])
+                # if type(drude_params['rho']) in [int, float]:
+                #     self.rho = drude_params['rho']
+                # else: 
+                self.rho = bd.array([drude_params['rho']])
             
+        self.ionization_params = ionization_params
         if ionization_params == {}:
             # error if D > 0 and not drude
             self.rate_equation = 'none'
@@ -154,6 +156,8 @@ class Material():
                 self.rate_equation = 'dre'
                 self.cross_section = ionization_params['cross_section']
                 self.trackables += ['el_heating_rate','hl_heating_rate','coll_freq_en','coll_freq_hn','critical_energy','r_e','r_h','xi_e','xi_h']
+
+        self.traps = []
 
 
     def place_in_domain(self, domain, boundaries):
@@ -281,23 +285,46 @@ class Material():
             raise ValueError("Invalid field ionization mode. Use 'linear', 'nearest' or 'brute'.")
 
         # Saturation
-        self.fi_rate *= self.mask*(self.density-self.rho)/self.density
-
-        # Plasma formation
-        self.rho += self.domain.dt*self.fi_rate
+        self.fi_rate *= self.mask*(self.density-self.rho-self.trapped_rho)/self.density
 
         # Energy loss of the field = Energy gain in plasma
         self.domain.fields['Jfi'] = self.bandgap*self.fi_rate[...,None]*self.domain.fields['E']/(E_amp[...,None]+1e-9)**2.0
+
+        # Re-ionization of trapped electrons
+        for trap in self.traps:
+            trap_fi_rate = trap.fi_rate(E_amp)
+            self.domain.fields['Jfi'] += trap.energy*trap_fi_rate[...,None]*self.domain.fields['E']/(E_amp[...,None]+1e-9)**2.0
+            trap.trapped -= self.domain.dt*trap_fi_rate
+            self.fi_rate += trap_fi_rate
+
+        # Plasma formation
+        self.rho += self.domain.dt*self.fi_rate
 
 
     def impact_ionization(self, E):
         tracks = [observer.target for observer in self.domain.observers if observer.target in self.trackables]
         self.ii_rate = self.mask*ii.ii_rate(E, self, self.domain.laser, self.domain.dt, tracks)
+
+        # Re-ionization of trapped electrons
+        for trap in self.traps:
+            trap_ii_rate = trap.ii_rate(E)
+            trap.trapped -= self.domain.dt*trap_ii_rate
+            self.ii_rate += trap_ii_rate
+
         self.rho += self.domain.dt*self.ii_rate
 
 
     def recombination(self):
         self.rho -= self.domain.dt*self.rho*self.recombination_rate
+        for trap in self.traps:
+            trap.recombination()
+
+
+    def trapping(self):
+        for trap in self.traps:
+            new_trapped = self.domain.dt*self.rho*trap.trapping_rate
+            self.rho -= new_trapped
+            trap.trapped += new_trapped
 
 
     def get_number_mre_levels(self):
@@ -335,3 +362,10 @@ class Material():
         self.transmitivity = 1-self.Reflectivity
         return bd.array(self.transmitivity)
 
+
+    @property
+    def trapped_rho(self):
+        trapped_rho = 0
+        for trap in self.traps:
+            trapped_rho += trap.trapped
+        return trapped_rho

@@ -147,6 +147,7 @@ class Domain():
                 material.impact_ionization(E_amp)
             if material.rate_equation is not 'none':
                 material.recombination()
+                material.trapping()
 
 
     def update_currents(self):

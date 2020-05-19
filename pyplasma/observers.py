@@ -68,7 +68,8 @@ class Observer():
         # TODO : get the actual list of material's tracktables
         if target in ['rho','rho_k','rho_hk','Ekin','Ekin_h',
                       'el_heating_rate','hl_heating_rate','critical_energy',
-                      'r_e','r_h','xi_e','xi_h','coll_freq_en','coll_freq_hn']:
+                      'r_e','r_h','xi_e','xi_h','coll_freq_en','coll_freq_hn',
+                      'trapped_rho']:
             data = 0
             for material in self.domain.materials:
                 data += getattr(material, target)

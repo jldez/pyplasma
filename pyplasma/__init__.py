@@ -9,6 +9,7 @@ from .backend import set_backend
 from .simulation import Domain
 from .laser import Laser
 from .material import Material
+from .traps import Trap
 from .observers import *
 
 import scipy.constants as c
