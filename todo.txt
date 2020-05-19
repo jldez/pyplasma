@@ -1,6 +1,7 @@
 To do list.
 
 ***General***
+initialize rho in 1D or 2D should work without the boundary ghost cells
 
 ***Boundaries***
 PMLs along y and z axes.
