@@ -90,8 +90,12 @@ def surface_roughness(material, boundary, amplitude=1, noise='white', feature_si
     for iy in range(0,material.domain.Ny-1):
         for iz in range(0,material.domain.Nz-1):
             ir, rem_r = material.parse_index((material.boundaries[boundary]-roughness_map[iy,iz])/material.domain.dx)
-            material.mask[ir:ix+1,iy,iz] = 1
-            material.mask[ir,iy,iz] -= rem_r
+            if roughness_map[iy,iz] >= 0:
+                material.mask[ir:ix+1,iy,iz] = 1
+                material.mask[ir,iy,iz] -= rem_r
+            else:
+                material.mask[ir:ix+1,iy,iz] = 0
+                material.mask[ir,iy,iz] += rem_r
 
     for iy in range(0,material.domain.Ny):
         material.mask[:,iy,-1] = material.mask[:,iy,0]

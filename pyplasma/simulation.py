@@ -141,11 +141,11 @@ class Domain():
     def update_plasma(self):
         E_amp = self.E_amp
         for material in self.materials:
-            if material.rate_equation is not 'none':
+            if material.rate_equation != 'none':
                 material.field_ionization(E_amp)
             if material.rate_equation in ['sre','mre','dre']:
                 material.impact_ionization(E_amp)
-            if material.rate_equation is not 'none':
+            if material.rate_equation != 'none':
                 material.recombination()
                 material.trapping()
 

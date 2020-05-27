@@ -114,7 +114,8 @@ class Material():
                 # if type(drude_params['rho']) in [int, float]:
                 #     self.rho = drude_params['rho']
                 # else: 
-                self.rho = bd.array([drude_params['rho']])
+                # self.rho = bd.array([drude_params['rho']])
+                self.rho = bd.array([float(drude_params['rho'])])
             
         self.ionization_params = ionization_params
         if ionization_params == {}:
@@ -293,9 +294,17 @@ class Material():
         # Re-ionization of trapped electrons
         for trap in self.traps:
             trap_fi_rate = trap.fi_rate(E_amp)
+            trap_fi_rate *= self.mask*trap.trapped/(trap.trap_density+1.0)
             self.domain.fields['Jfi'] += trap.energy*trap_fi_rate[...,None]*self.domain.fields['E']/(E_amp[...,None]+1e-9)**2.0
             trap.trapped -= self.domain.dt*trap_fi_rate
             self.fi_rate += trap_fi_rate
+
+        # fi VB to traps
+        for trap in self.traps:
+            trap_fi_rate_from_VB = trap.fi_rate_from_VB(E_amp)
+            trap_fi_rate_from_VB *= self.mask*bd.clip((trap.trap_density-trap.trapped)/(trap.trap_density+1.0),0.0,1.0) #saturation traps
+            self.domain.fields['Jfi'] += (self.bandgap - trap.energy)*trap_fi_rate_from_VB[...,None]*self.domain.fields['E']/(E_amp[...,None]+1e-9)**2.0
+            trap.trapped += self.domain.dt*trap_fi_rate_from_VB
 
         # Plasma formation
         self.rho += self.domain.dt*self.fi_rate
@@ -308,22 +317,34 @@ class Material():
         # Re-ionization of trapped electrons
         for trap in self.traps:
             trap_ii_rate = trap.ii_rate(E)
+            trap_ii_rate *= self.mask*trap.trapped/self.density
             trap.trapped -= self.domain.dt*trap_ii_rate
             self.ii_rate += trap_ii_rate
+
+        # ii VB to traps
+        for trap in self.traps:
+            trap_ii_rate_from_VB = trap.ii_rate_from_VB(E)
+            trap_ii_rate_from_VB *= self.mask*bd.clip((trap.trap_density-trap.trapped)/(trap.trap_density+1.0),0.0,1.0) #saturation traps
+            trap.trapped += self.domain.dt*trap_ii_rate_from_VB
 
         self.rho += self.domain.dt*self.ii_rate
 
 
     def recombination(self):
         self.rho -= self.domain.dt*self.rho*self.recombination_rate
+        self.rho = bd.abs(self.rho)
         for trap in self.traps:
             trap.recombination()
 
 
     def trapping(self):
         for trap in self.traps:
+            # if trap.trap_density > 0.0 and trap.trapped < trap.trap_density:
             new_trapped = self.domain.dt*self.rho*trap.trapping_rate
+            new_trapped *= (trap.trap_density - trap.trapped)/(trap.trap_density+1.0) #trap saturation
+            new_trapped = bd.abs(new_trapped)
             self.rho -= new_trapped
+            self.rho = bd.abs(self.rho)
             trap.trapped += new_trapped
 
 
