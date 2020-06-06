@@ -111,11 +111,10 @@ class Material():
             else: 
                 self.m_red = self.m_CB
             if 'rho' in drude_params:
-                # if type(drude_params['rho']) in [int, float]:
-                #     self.rho = drude_params['rho']
-                # else: 
-                # self.rho = bd.array([drude_params['rho']])
-                self.rho = bd.array([float(drude_params['rho'])])
+                if bd.is_any_array(drude_params['rho']):
+                    self.rho = bd.array([drude_params['rho']])
+                else:
+                    self.rho = bd.array([float(drude_params['rho'])])
             
         self.ionization_params = ionization_params
         if ionization_params == {}:
@@ -342,7 +341,6 @@ class Material():
             # if trap.trap_density > 0.0 and trap.trapped < trap.trap_density:
             new_trapped = self.domain.dt*self.rho*trap.trapping_rate
             new_trapped *= (trap.trap_density - trap.trapped)/(trap.trap_density+1.0) #trap saturation
-            new_trapped = bd.abs(new_trapped)
             self.rho -= new_trapped
             self.rho = bd.abs(self.rho)
             trap.trapped += new_trapped

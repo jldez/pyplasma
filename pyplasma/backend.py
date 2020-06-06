@@ -83,6 +83,12 @@ class NumpyBackend(Backend):
         """ check if an object is an array """
         return isinstance(arr, numpy.ndarray)
 
+    def is_any_array(self, arr):
+        if not TORCH_AVAILABLE:
+            return isinstance(arr, numpy.ndarray)
+        else:
+            return isinstance(arr, numpy.ndarray) or torch.is_tensor(arr)
+
     # constructors
     array = staticmethod(numpy.array)
     ones = staticmethod(numpy.ones)
@@ -130,6 +136,9 @@ if TORCH_AVAILABLE:
         def is_array(self, arr):
             """ check if an object is an array """
             return torch.is_tensor(arr)
+
+        def is_any_array(self, arr):
+            return isinstance(arr, numpy.ndarray) or torch.is_tensor(arr)
 
         # constructors
         ones = staticmethod(torch.ones)

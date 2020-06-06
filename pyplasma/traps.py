@@ -19,9 +19,11 @@ class Trap(Material):
         self.recombination_rate = recombination_rate
         self.trapped = 0
 
+        if bd.is_any_array(self.trap_density):
+            self.trap_density = bd.array(self.trap_density)
+
         drude_params = copy.deepcopy(material.drude_params)
         drude_params['rho'] = 0
-        # drude_params['m_VB'] = np.inf
 
         ionization_params = copy.deepcopy(material.ionization_params)
         ionization_params['bandgap'] = self.energy
@@ -138,4 +140,3 @@ class Trap(Material):
 
     def recombination(self):
         self.trapped -= self.domain.dt*self.trapped*self.recombination_rate
-        # self.trapped = bd.abs(self.trapped)
