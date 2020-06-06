@@ -24,7 +24,6 @@ if __name__ == '__main__':
     params_mre = {'rate_equation':'mre', 'E0':4.16e9}
     params_dre = {'rate_equation':'dre', 'E0':3.66e9}
     
-    time = Time(0, 100*fs, 1000)
     ratios = {'time':np.linspace(0,100,1000)}
     for params in [params_sre, params_mre, params_dre]:
         mat = Material(index=1.5, drude_params={'damping':1e15}, 
@@ -121,7 +120,7 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.subplots_adjust(wspace = 0.1)
 
-    # plt.savefig("ratio.pdf")
-    # os.system("pdfcrop ratio.pdf ratio.pdf > /dev/null")
+    plt.savefig("ratio.pdf")
+    os.system("pdfcrop ratio.pdf ratio.pdf > /dev/null")
 
-    plt.show()
+    # plt.show()

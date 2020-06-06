@@ -28,7 +28,7 @@ if __name__ == '__main__':
 	plt.xlabel(r"$r_s$")
 	plt.legend(loc=(0.1,0.1),frameon=False,handletextpad=0.5)
 	plt.tight_layout()
-	# plt.savefig("xi.pdf")
-	# os.system("pdfcrop xi.pdf xi.pdf > /dev/null")
+	plt.savefig("xi.pdf")
+	os.system("pdfcrop xi.pdf xi.pdf > /dev/null")
 
-	plt.show()
+	# plt.show()

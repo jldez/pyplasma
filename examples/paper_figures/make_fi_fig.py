@@ -48,6 +48,6 @@ if __name__ == '__main__':
 
 	plt.tight_layout()
 	plt.subplots_adjust(left=0.15,right=0.99,top=0.987,bottom=0.15)
-	# plt.savefig("fi.pdf")
-	# os.system("pdfcrop fi.pdf fi.pdf > /dev/null")
-	plt.show()
+	plt.savefig("fi.pdf")
+	os.system("pdfcrop fi.pdf fi.pdf > /dev/null")
+	# plt.show()

@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     plt.tight_layout()
     plt.subplots_adjust(hspace=0.3,wspace=0.2,left=0.06,right=0.91,bottom=0.1,top=0.99)
-    # plt.savefig("drude.pdf")
-    # os.system("pdfcrop drude.pdf drude.pdf > /dev/null")
+    plt.savefig("drude.pdf")
+    os.system("pdfcrop drude.pdf drude.pdf > /dev/null")
 
-    plt.show()
+    # plt.show()

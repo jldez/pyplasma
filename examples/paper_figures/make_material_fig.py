@@ -142,6 +142,6 @@ if __name__ == '__main__':
 	plt.ylabel(r"$F_{\mathrm{th}}~\mathrm{[J/cm}^2]$")
 	plt.tight_layout()
 
-	# plt.savefig("materials_energy.pdf")
-	# os.system("pdfcrop materials_energy.pdf materials_energy.pdf > /dev/null")
-	plt.show()
+	plt.savefig("materials_energy.pdf")
+	os.system("pdfcrop materials_energy.pdf materials_energy.pdf > /dev/null")
+	# plt.show()

@@ -172,7 +172,7 @@ if __name__ == '__main__':
     plt.ylabel(r"$F_{\mathrm{th}}~\mathrm{[J/cm}^2]$",labelpad=-7, y=0.4)
     plt.tight_layout()
 
-    # plt.savefig("fth_energy.pdf")
-    # os.system("pdfcrop fth_energy.pdf fth_energy.pdf > /dev/null")
+    plt.savefig("fth_energy.pdf")
+    os.system("pdfcrop fth_energy.pdf fth_energy.pdf > /dev/null")
 
-    plt.show()
+    # plt.show()
