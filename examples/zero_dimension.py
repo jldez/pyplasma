@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     dom = Domain()
 
-    laser = Laser(wavelength=800*nm, pulse_duration=10*fs, fluence=7e4, t0=20*fs, phase=True)
+    laser = Laser(wavelength=800*nm, pulse_duration=10*fs, fluence=6e4, t0=20*fs, phase=True)
     dom.add_laser(laser, remove_reflected_part=True)
 
     material = Material(index=1.4, drude_params={'damping':1e15},
