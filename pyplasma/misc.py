@@ -53,7 +53,7 @@ def el_Ekin_max(E, material, laser):
         /(2.*Ec*material.cross_section*material.density)*(material.m_CB*c.m_e*c.pi/(3.*Ec))**.5))).max()
 
 
-def surface_roughness(material, boundary, amplitude=1, noise='white', feature_size='default', fill_factor=0, show=False, roughness_map=None):
+def surface_roughness(material, boundary, amplitude=1, noise='white', feature_size='default', fill_factor=0.1, show=False, roughness_map=None):
 
     if not hasattr(material, 'domain'):
         raise ValueError('Material has to be attached to a Domain in order to add surface roughness to it.')

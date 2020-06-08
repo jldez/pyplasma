@@ -1,4 +1,8 @@
 
+# Update version on PyPi:
+# python3 setup.py sdist
+# twine upload dist/*
+
 __name__ = 'pyplasma'
 __author__ = 'Jean-Luc Déziel'
 __version__ = '0.4.0'
