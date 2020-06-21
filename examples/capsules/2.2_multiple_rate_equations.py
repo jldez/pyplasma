@@ -32,7 +32,7 @@ x = np.linspace(0.4,4.6,results['Ez'].shape[-1])
 ax = fig.add_subplot(211,xlim=(x.min(), x.max()), ylim=(-0.5, 1.2))
 ax.set_xlabel(r"$x~[\mu\mathrm{m}]$")
 ax.add_patch(patches.Rectangle((2,-2),20,4,linewidth=1.5,edgecolor='0.8',facecolor='0.9'))
-lines = [plt.plot([], [], c='0.5',label=r'$|\vec{E}|/E_0$')[0] , \
+lines = [plt.plot([], [], c='0.5',label=r'$E_z/E_0$')[0] , \
          plt.plot([], [], c='darkred',label=r'$\rho/\rho_0$')[0] ,\
          plt.plot([], [], c='darkred',ls='--',label=r'$\rho_\mathrm{fi}/\rho_0$')[0] ,\
          plt.plot([], [], c='darkred',ls=':',label=r'$\rho_\mathrm{ii}/\rho_0$')[0] ,\
@@ -42,8 +42,8 @@ ax.legend(loc=1,frameon=False,borderaxespad=0)
 
 ax2 = fig.add_subplot(212)
 k = results['rho_k'].shape[-1]
-colors = ['C0' for k in range(k-1)] + ['r']
-bars = ax2.bar([str(ik) for ik in range(k)], [0 for ik in range(k)], color=colors)
+colors = ['g' for k in range(k-1)] + ['r']
+bars = ax2.bar([str(ik) for ik in range(k)], [0 for ik in range(k)], color=colors, alpha=0.5)
 ax2.set(frame_on=False)
 rho_0 = results['rho'].max()
 ax2.set_ylim(0, results['rho_k'].max()/rho_0)

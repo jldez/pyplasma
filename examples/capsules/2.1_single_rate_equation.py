@@ -29,7 +29,7 @@ x = np.linspace(0.4,4.6,results['Ez'].shape[-1])
 ax = plt.axes(xlim=(x.min(), x.max()), ylim=(-0.5, 1.2))
 ax.set_xlabel(r"$x~[\mu\mathrm{m}]$")
 ax.add_patch(patches.Rectangle((2,-2),20,4,linewidth=1.5,edgecolor='0.8',facecolor='0.9'))
-lines = [plt.plot([], [], c='0.5',label=r'$|\vec{E}|/E_0$')[0] , \
+lines = [plt.plot([], [], c='0.5',label=r'$E_z/E_0$')[0] , \
          plt.plot([], [], c='darkred',label=r'$\rho/\rho_0$')[0] ,\
          plt.plot([], [], c='darkred',ls='--',label=r'$\rho_\mathrm{fi}/\rho_0$')[0] ,\
          plt.plot([], [], c='darkred',ls=':',label=r'$\rho_\mathrm{ii}/\rho_0$')[0] ,\

@@ -12,13 +12,8 @@ Choose polarization axis.
 Phase parameter should actually be a phase. Find other name for toggling on/off the oscillations.
 
 ***Materials***
-Self-trapping
-Incubation
-Validate medium mask float values along y and z working properly
 Move out ionization stuff
-Fluence thresold finder
 Volume inhomogeneities
-material presets in init file
 
 ***Observers***
 Watcher should show actual material mask
